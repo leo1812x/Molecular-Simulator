@@ -1,0 +1,19 @@
+{
+  "name": "chemical-simuator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "watchify ./public/index.js -o ./public/bundle.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.4.7",
+    "watchify": "^4.0.0"
+  },
+  "dependencies": {
+    "periodic-table": "^0.0.8"
+  }
+}
