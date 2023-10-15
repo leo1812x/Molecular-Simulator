@@ -39,12 +39,25 @@
     bottom: 10px;
     top: 70px;  
     left: 10px;
-    right: 10px;
+    right: 300px;
     box-sizing: border-box;
     border: 1px solid gray;
     
 }
 
+.simulator-info{
+    border-style: solid;
+    border-width: 3.5px;
+    border-color: gray;
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    top: 70px;
+    width: 280px;
+    box-sizing: border-box;
+    border: 1px solid gray;
+
+}
 
 .info-button{
     background-color: rgb(128, 128, 128);
@@ -66,4 +79,8 @@
 
 .lk-logo, .gh-logo:hover{
     cursor: pointer;
+}
+
+.input{
+    width: 600px;
 }

@@ -1102,7 +1102,7 @@ class DOMElemento {
         else {
             this.html.style.backgroundColor = 'red';
         }
-        // console.log(`level:${this.level}---max:${this.max}---current:${this.electronInlevel}`);
+        console.log(`level:${this.level}---max:${this.max}---current:${this.electronInlevel}`);
     }
     Bond(other) {
         //! Ion bond
@@ -1117,23 +1117,21 @@ class DOMElemento {
         //! covalent bond
         else if (Math.abs(this.element.electronegativity - other.element.electronegativity) < 1.7) {
             console.log('covalent bond!');
-            console.log(other);
+            // console.log(other);
             this.bonded.push(other);
         }
         this.isStable();
     }
 }
-class DOMCompound {
-    constructor(...element) {
-        elements;
-    }
-}
 //! Testing
 // let circle = new DOMElemento(elements.Helium);
-// let circle3 = new DOMElemento(numbers[2]);
+let circle3 = new DOMElemento(numbers[2]);
 // let circle4 = new DOMElemento(numbers[3]);
-let circle5 = new DOMElemento(symbols.O);
-let circle2 = new DOMElemento(symbols.N);
-circle2.html.style.left = '200px';
+// let circle5 = new DOMElemento(symbols.O);
+// let circle2 = new DOMElemento(symbols.N);
+// let circle3 = new DOMElemento(symbols.Mg);
+let circle6 = new DOMElemento(numbers[1]);
+let circle7 = new DOMElemento(numbers[7]);
+circle6.html.style.left = '200px';
 
 },{"periodic-table":3}]},{},[5]);
