@@ -8,28 +8,24 @@ let objects: DOMElemento[] = [];
 
 //! Classes
 class DOMElemento {
-    static id:number = 0;
-    hold:boolean;
-    html:HTMLElement;
+    //*for element
     element;
+
+    //*for DOM
+    static id:number = 0;
+    html:HTMLElement;
+    hold:boolean;
+    bonded:boolean;
+
 
     //*for bonds
     level:number;
     letter:string;
-    electronInlevel:number;
+    valenceNumber:number;
     max:number;
-    bonded:DOMElemento[] = [];
 
-    //* electrons
-    electrons: Record<number, HTMLDivElement | undefined> = {
-        1:undefined,
-        2:undefined,
-        4:undefined,
-        5:undefined,
-        6:undefined,
-        7:undefined,
-        8:undefined,
-    }
+    //*for molecules
+
 
     constructor(element) {
         this.element = window.structuredClone(element);
@@ -78,26 +74,24 @@ class DOMElemento {
     }
 
     //! Lewis structure
-    lewisInit(){
-        console.log(this.electronInlevel);
+    lewisInit():void{
+        // console.log(this.electronInlevel);
         
-        for (let i = 0; i < this.electronInlevel; i++){
+        for (let i = 0; i < this.valenceNumber; i++){
             //* create html element and atributes    
             let dot = document.createElement('div');
             dot.setAttribute('class', 'electron');
             dot.setAttribute('id', 'e' +(i + 1));
-            // dot.innerHTML = 'e-';
             dot.style.fontSize = '12px';
-            dot.classList.add()
+            // dot.classList.add() i dont remember why i had this
 
             //* append to its element and organize them in electrons[]
             this.html.append(dot);
-            this.electrons[i] = dot;
         } 
     }
 
-    //! class functions
     move(e):void {
+
         //*this peace of code gives the coordenates of the click relative to the SIMULATOR
         let rect = SIMULATOR.getBoundingClientRect();
         let x = e.clientX - rect.left; 
@@ -114,7 +108,9 @@ class DOMElemento {
         if (y >= rect.bottom - 135) this.html.style.top = (rect.bottom - 185) + 'px'; 
     }
 
-    collisionCheck():void {
+    collisionCheck():DOMElemento{
+        if (this.bonded) return;
+
         //*get circle coordenates
         let current = this.html.getBoundingClientRect();
         
@@ -134,36 +130,45 @@ class DOMElemento {
                 if (distance < 100){
                     // console.log(`crashed with ${other.element.name}`);
                     this.Bond(other);
+                    this.bonded = true;
+                    return other;
                 }
             }
         })
     }
 
-    //! CHIMESTRY MATH
-    initialStability(){
+    getInitialLevel():number{
         let {electronicConfiguration} = this.element;
 
-        //*getters
         this.level = electronicConfiguration[electronicConfiguration.length - 3];
-        this.letter = electronicConfiguration[electronicConfiguration.length - 2];
-        this.electronInlevel = +electronicConfiguration[electronicConfiguration.length - 1];        
-
-        //*fix elenctronInlevels
-        if (this.letter === 'p') {this.electronInlevel += 2;}
-        if (this.letter === 'd') {this.electronInlevel += 8;}
-        if (this.letter === 'f') {this.electronInlevel += 19;}
-
-        // console.log(electronicConfiguration);
         // console.log(`level = ${this.level}`);
-        // console.log(`letter = ${this.letter}`);
-        // console.log(`electron in level = ${this.electronInlevel}`);
-        
-        this.isStable();
+        return this.level;
     }
 
-    isStable(){
-        //* get max num in last ring
+    getInitialLetter():string{
+        let {electronicConfiguration} = this.element;
+
+        this.letter = electronicConfiguration[electronicConfiguration.length - 2];
+        // console.log(`letter = ${this.letter}`);
+        return this.letter;
+    }
+
+    getInitialValenceNumber():number{
+        let {electronicConfiguration} = this.element;
+
+        this.valenceNumber = +electronicConfiguration[electronicConfiguration.length - 1];  
+        
+        //*fix elenctronInlevels
+        if (this.letter === 'p') {this.valenceNumber += 2;}
+        if (this.letter === 'd') {this.valenceNumber += 8;}
+        if (this.letter === 'f') {this.valenceNumber += 19;}
+
+        return this.valenceNumber;
+    }
+
+    getMaxNumberInLevel():number{
         //? Change this for something better?
+
         if (this.level == 1) {this.max = 2;}
         if (this.level == 2) {
             if (this.letter == 's'){this.max = 2}
@@ -192,16 +197,30 @@ class DOMElemento {
             else if (this.letter == 'p'){this.max = 8}
             else if (this.letter == 'd'){this.max = 18}}
 
+        return this.max;
+    }
+
+
+    //! CHIMESTRY MATH
+    initialStability(){
+        this.getInitialLevel();
+        this.getInitialLetter();
+        this.getInitialValenceNumber();
+        this.getMaxNumberInLevel();
+        this.isStable();
+    }
+
+    isStable(){
 
         //*turn green if stable
-        if (this.electronInlevel === 0 ||
-            this.electronInlevel === this.max){
+        if (this.valenceNumber === 0 ||
+            this.valenceNumber === this.max){
             this.html.style.backgroundColor = 'green';}
 
         //*turn red if inestable
         else {this.html.style.backgroundColor = 'red';}
 
-        console.log(`level:${this.level}---max:${this.max}---current:${this.electronInlevel}`);
+        // console.log(`level:${this.level}---max:${this.max}---current:${this.valenceNumber}`);
     }
 
     Bond(other:DOMElemento){
@@ -213,38 +232,40 @@ class DOMElemento {
             console.log('Ionic bond!');
             
 
-            moreNegative.electronInlevel += 1;
-            lessNegative.electronInlevel -= 1;
+            moreNegative.valenceNumber += 1;
+            lessNegative.valenceNumber -= 1;
             
         }
 
         //! covalent bond
         else if (Math.abs(this.element.electronegativity - other.element.electronegativity) < 1.7){
             console.log('covalent bond!');
-            // console.log(other);
-            
-            this.bonded.push(other);
-            
-            
+                        
         }
-
         this.isStable();
+
     }
 }
 
+class DOMCompound{
+    constructor(...element:DOMElemento[] | DOMCompound[]){
+        elements
+        
+    }
+}
 
 //! Testing
 // let circle = new DOMElemento(elements.Helium);
-let circle3 = new DOMElemento(numbers[2]);
+let circle1 = new DOMElemento(numbers[2]);
 // let circle4 = new DOMElemento(numbers[3]);
 // let circle5 = new DOMElemento(symbols.O);
-// let circle2 = new DOMElemento(symbols.N);
-// let circle3 = new DOMElemento(symbols.Mg);
+let circle2 = new DOMElemento(symbols.Na);
+let circle3 = new DOMElemento(symbols.Cl);
 
-let circle6 = new DOMElemento(numbers[1]);
-let circle7 = new DOMElemento(numbers[7]);
+// let circle6 = new DOMElemento(numbers[1]);
+// let circle7 = new DOMElemento(numbers[85]);
 
-circle6.html.style.left = '200px';
-
+circle3.html.style.left = '200px';
+circle1.html.style.left = '300px';
 
 
