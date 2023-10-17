@@ -2,66 +2,35 @@
 var pt = require('periodic-table');
 let {elements, symbols, numbers} = pt;
 
+
 //! Set up
 const SIMULATOR = document.getElementById('simulator');
-let objects: DOMElemento[] = [];
+let objects: DOMObject[] = [];
 
 class DOMObject {
     //*for DOM
     static id:number = 0;
     html:HTMLElement;
     hold:boolean;
-    bonded:boolean;
 
     constructor(element){
-
-    }
-}
-
-
-//! Classes
-class DOMElemento extends DOMObject{
-    element;
-
-
-    //*for bonds
-    level:number;
-    letter:string;
-    valenceNumber:number;
-    max:number;
-
-    constructor(element) { //!HTML
-        super(element);
-
-        //not sure if this is necessary
-        this.element = structuredClone(element);
-
         //* create HTML div
         this.html = document.createElement('div');
-        this.html.innerHTML = `${element.name}`;
-
-        //* set HTML attributes
         this.html.setAttribute('id', DOMElemento.id.toString());
-        DOMElemento.id++;
-        this.html.setAttribute('class', 'element');
+        DOMObject.id++;
         
-        //*HTML Event listeners
+        //*event listeners
         this.html.onpointerdown = () =>{
             this.hold = true;
             this.html.style.left = '0%';
             this.html.style.top = '0%;';
-            
         }
-        this.html.onmousemove = (e) => {
-            e.preventDefault();                                                
-            if(this.hold){
-                this.move(e);
-                this.collisionCheck();
-            }
-        }
+
         this.html.onpointerup = () => {
             this.hold = false;
         }
+
+        //TODO this needs to be fixed so the borders fuction correcly
         this.html.onmouseout = (e) =>{
             if (this.hold){
                 this.move(e);
@@ -70,18 +39,85 @@ class DOMElemento extends DOMObject{
         }
 
         //* append to simulator and array of object in the simulator
-        this.initialStability();
         SIMULATOR.append(this.html);
         objects.push(this);
-        
-        //*add electrons to DOMelemento
-        this.lewisInit();
-
-
     }
 
-    lewisInit():void{
+    //*Movement
+    //?TODO
+    move(e):void {}
+
+    //?TODO i think i need a different implementation for DOMElement and DOMCompound
+    collisionCheck(){}
+
+    //*Chemistry 
+    //? should i do something better with this?
+    bond(other:DOMObject):void{
+
+        //*element with element
+        if (other instanceof DOMElemento && this instanceof DOMElemento){
+            //*don't bond if stable
+            if (this.isStable() || other.isStable()){return;}
+
+
+            //*check for Ion bond
+            if (Math.abs(this.element.electronegativity - other.element.electronegativity) > 1.7){
+                this.ionBond(other);
+            }
+
+            //*check for covalent bond
+            else if (Math.abs(this.element.electronegativity - other.element.electronegativity) < 1.7){
+                this.covalentBond(other)
+            }
+
+            this.bonded = true;
+            this.updateStability();
+            other.updateStability();
+        }
+
+        //*element with compound
+        else if (this instanceof DOMElemento && other instanceof DOMCompound){};
+    }
+
+}
+
+
+//! Classes
+class DOMElemento extends DOMObject{
+    element;
+
+    //*for bonds
+    level:number;
+    letter:string;
+    valenceNumber:number;
+    max:number;
+    bonded:boolean;
+
+    constructor(element) { //!HTML
+        super(element);
+
+        //not sure if structuredClone() is necessary
+        this.element = structuredClone(element);
+
+        //* set HTML attributes
+        this.html.innerHTML = `${element.name}`;
+        this.html.setAttribute('class', 'element');
+        
+        //apparently this can't be on the super-class or it lags really bad on onmousemove()
+        this.html.onmousemove = (e) => {
+            e.preventDefault();                                                
+            if(this.hold){
+                this.move(e);
+                this.collisionCheck();
+            }
+        }
+        //*exclusive to DOMElemento
+        this.initialStability();        
+        this.lewisInit();
+    }
+
         //*adds the valence electrons to the element in the DOM
+    lewisInit():void{
         for (let i = 0; i < this.valenceNumber; i++){
             //* create html element and atributes    
             let dot = document.createElement('div');
@@ -120,7 +156,7 @@ class DOMElemento extends DOMObject{
         if (y >= rect.bottom - 135) this.html.style.top = (rect.bottom - 185) + 'px'; 
     }
 
-    collisionCheck():DOMElemento{
+    collisionCheck():DOMObject{
         if (this.bonded) return;
 
         //*get circle coordenates
@@ -139,9 +175,8 @@ class DOMElemento extends DOMObject{
                 // console.log(distance);
                 
                 //* crash
-                if (distance < 100){
-                    // console.log(`crashed with ${other.element.name}`);
-                    this.Bond(other);
+                if (distance < 100){                    
+                    this.bond(other);
                     return other;
                 }
             }
@@ -182,17 +217,13 @@ class DOMElemento extends DOMObject{
 
     getMaxNumberInLevel():number{
             switch (this.letter) {
-                case "s":
-                    this.max = 2;
+                case "s": this.max = 2;
                     break;
-                case "p":
-                    this.max = 8;
+                case "p": this.max = 8;
                     break;
-                case "d":
-                    this.max = 2;
+                case "d": this.max = 2;
                     break;
-                case "f":
-                    this.max = 2;
+                case "f": this.max = 2;
                     break;
                 default:
                    throw new Error("check this lol");
@@ -208,6 +239,12 @@ class DOMElemento extends DOMObject{
         this.isStable();
     }
 
+    updateStability():void{
+        this.lewisRemove();
+        this.isStable();
+        this.lewisInit();
+    }
+
     isStable():boolean{
         //*turn green if stable
         if (this.valenceNumber === 0 || this.valenceNumber === this.max){
@@ -215,47 +252,23 @@ class DOMElemento extends DOMObject{
             return true;
             }
             
-
         //*turn red if inestable
         else {this.html.style.backgroundColor = 'red';
               return false;}
-
-        // console.log(`level:${this.level}---max:${this.max}---current:${this.valenceNumber}`);
     }
 
-    Bond(other:DOMElemento){
-        //*don't bond if stable
-        if (this.isStable() || other.isStable()){
-            return;
-        }
-
-        //! Ion bond
+    ionBond(other){
         //* find most and least electronegative
-        if (Math.abs(this.element.electronegativity - other.element.electronegativity) > 1.7){
-            let moreNegative = (this.element.electronegativity > other.element.electronegativity) ? this : other;
-            let lessNegative = (this.element.electronegativity < other.element.electronegativity) ? this : other;
-            console.log('Ionic bond!');
-            
+        let moreNegative = (this.element.electronegativity > other.element.electronegativity) ? this : other;
+        let lessNegative = (this.element.electronegativity < other.element.electronegativity) ? this : other;
+        console.log('Ionic bond!');
+        
+        moreNegative.valenceNumber += 1;
+        lessNegative.valenceNumber -= 1;
+    }
 
-            moreNegative.valenceNumber += 1;
-            lessNegative.valenceNumber -= 1;
-            
-        }
-
-        //! covalent bond
-        else if (Math.abs(this.element.electronegativity - other.element.electronegativity) < 1.7){
-            console.log('covalent bond!');
-                        
-        }
-
-        this.bonded = true;
-        this.lewisRemove();
-        this.isStable();
-        this.lewisInit();
-
-        other.lewisRemove();
-        other.isStable();
-        other.lewisInit();
+    covalentBond(other){
+        console.log('covalent bond!');
     }
 }
 
