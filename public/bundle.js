@@ -877,31 +877,35 @@ let { elements, symbols, numbers } = pt;
 //! Set up
 const SIMULATOR = document.getElementById('simulator');
 let objects = [];
-//! Classes
-class DOMElemento {
-    //*for element
-    element;
+class DOMObject {
     //*for DOM
     static id = 0;
     html;
     hold;
     bonded;
+    constructor(element) {
+    }
+}
+//! Classes
+class DOMElemento extends DOMObject {
+    element;
     //*for bonds
     level;
     letter;
     valenceNumber;
     max;
-    //*for molecules
     constructor(element) {
-        this.element = window.structuredClone(element);
-        //* create html
+        super(element);
+        //not sure if this is necessary
+        this.element = structuredClone(element);
+        //* create HTML div
         this.html = document.createElement('div');
         this.html.innerHTML = `${element.name}`;
-        //* set attributes
+        //* set HTML attributes
         this.html.setAttribute('id', DOMElemento.id.toString());
         DOMElemento.id++;
         this.html.setAttribute('class', 'element');
-        //* Event listeners
+        //*HTML Event listeners
         this.html.onpointerdown = () => {
             this.hold = true;
             this.html.style.left = '0%';
@@ -923,26 +927,31 @@ class DOMElemento {
                 this.collisionCheck();
             }
         };
-        //* append to simulator and array
+        //* append to simulator and array of object in the simulator
         this.initialStability();
         SIMULATOR.append(this.html);
         objects.push(this);
-        //*add electrons
+        //*add electrons to DOMelemento
         this.lewisInit();
     }
-    //! Lewis structure
     lewisInit() {
-        // console.log(this.electronInlevel);
+        //*adds the valence electrons to the element in the DOM
         for (let i = 0; i < this.valenceNumber; i++) {
             //* create html element and atributes    
             let dot = document.createElement('div');
             dot.setAttribute('class', 'electron');
             dot.setAttribute('id', 'e' + (i + 1));
             dot.style.fontSize = '12px';
-            // dot.classList.add() i dont remember why i had this
             //* append to its element and organize them in electrons[]
             this.html.append(dot);
         }
+    }
+    lewisRemove() {
+        //*deletes the previus valence electrons in the DOMelemento
+        let children = Array.from(this.html.children);
+        children.forEach((children) => {
+            this.html.removeChild(children);
+        });
     }
     move(e) {
         //*this peace of code gives the coordenates of the click relative to the SIMULATOR
@@ -952,7 +961,7 @@ class DOMElemento {
         //*make move
         this.html.style.left = x - 50 + 'px';
         this.html.style.top = y - 50 + 'px';
-        //* keep inside box
+        //*keep inside box
         if (x <= 62)
             this.html.style.left = '12px';
         if (y <= 62)
@@ -980,7 +989,6 @@ class DOMElemento {
                 if (distance < 100) {
                     // console.log(`crashed with ${other.element.name}`);
                     this.Bond(other);
-                    this.bonded = true;
                     return other;
                 }
             }
@@ -988,20 +996,23 @@ class DOMElemento {
     }
     getInitialLevel() {
         let { electronicConfiguration } = this.element;
+        //*get level of element from Periodic table 
         this.level = electronicConfiguration[electronicConfiguration.length - 3];
         // console.log(`level = ${this.level}`);
         return this.level;
     }
     getInitialLetter() {
         let { electronicConfiguration } = this.element;
+        //*get letter of element from Periodic table 
         this.letter = electronicConfiguration[electronicConfiguration.length - 2];
         // console.log(`letter = ${this.letter}`);
         return this.letter;
     }
     getInitialValenceNumber() {
         let { electronicConfiguration } = this.element;
+        //*get electron in last level of element from Periodic table 
         this.valenceNumber = +electronicConfiguration[electronicConfiguration.length - 1];
-        //*fix elenctronInlevels
+        //*fix valence number by adding the electron on same level but different letter
         if (this.letter === 'p') {
             this.valenceNumber += 2;
         }
@@ -1014,85 +1025,24 @@ class DOMElemento {
         return this.valenceNumber;
     }
     getMaxNumberInLevel() {
-        //? Change this for something better?
-        if (this.level == 1) {
-            this.max = 2;
-        }
-        if (this.level == 2) {
-            if (this.letter == 's') {
+        switch (this.letter) {
+            case "s":
                 this.max = 2;
-            }
-            else if (this.letter == 'p') {
+                break;
+            case "p":
                 this.max = 8;
-            }
-        }
-        if (this.level == 3) {
-            if (this.letter == 's') {
+                break;
+            case "d":
                 this.max = 2;
-            }
-            else if (this.letter == 'p') {
-                this.max = 8;
-            }
-            else if (this.letter == 'd') {
-                this.max = 18;
-            }
-        }
-        if (this.level == 4) {
-            if (this.letter == 's') {
+                break;
+            case "f":
                 this.max = 2;
-            }
-            else if (this.letter == 'p') {
-                this.max = 8;
-            }
-            else if (this.letter == 'd') {
-                this.max = 18;
-            }
-            else if (this.letter == 'f') {
-                this.max = 32;
-            }
-        }
-        if (this.level == 5) {
-            if (this.letter == 's') {
-                this.max = 2;
-            }
-            else if (this.letter == 'p') {
-                this.max = 8;
-            }
-            else if (this.letter == 'd') {
-                this.max = 18;
-            }
-            else if (this.letter == 'f') {
-                this.max = 32;
-            }
-        }
-        if (this.level == 6) {
-            if (this.letter == 's') {
-                this.max = 2;
-            }
-            else if (this.letter == 'p') {
-                this.max = 8;
-            }
-            else if (this.letter == 'd') {
-                this.max = 18;
-            }
-            else if (this.letter == 'f') {
-                this.max = 32;
-            }
-        }
-        if (this.level == 7) {
-            if (this.letter == 's') {
-                this.max = 2;
-            }
-            else if (this.letter == 'p') {
-                this.max = 8;
-            }
-            else if (this.letter == 'd') {
-                this.max = 18;
-            }
+                break;
+            default:
+                throw new Error("check this lol");
         }
         return this.max;
     }
-    //! CHIMESTRY MATH
     initialStability() {
         this.getInitialLevel();
         this.getInitialLetter();
@@ -1102,19 +1052,24 @@ class DOMElemento {
     }
     isStable() {
         //*turn green if stable
-        if (this.valenceNumber === 0 ||
-            this.valenceNumber === this.max) {
+        if (this.valenceNumber === 0 || this.valenceNumber === this.max) {
             this.html.style.backgroundColor = 'green';
+            return true;
         }
         //*turn red if inestable
         else {
             this.html.style.backgroundColor = 'red';
+            return false;
         }
         // console.log(`level:${this.level}---max:${this.max}---current:${this.valenceNumber}`);
     }
     Bond(other) {
+        //*don't bond if stable
+        if (this.isStable() || other.isStable()) {
+            return;
+        }
         //! Ion bond
-        //* check electronegativity
+        //* find most and least electronegative
         if (Math.abs(this.element.electronegativity - other.element.electronegativity) > 1.7) {
             let moreNegative = (this.element.electronegativity > other.element.electronegativity) ? this : other;
             let lessNegative = (this.element.electronegativity < other.element.electronegativity) ? this : other;
@@ -1126,7 +1081,13 @@ class DOMElemento {
         else if (Math.abs(this.element.electronegativity - other.element.electronegativity) < 1.7) {
             console.log('covalent bond!');
         }
+        this.bonded = true;
+        this.lewisRemove();
         this.isStable();
+        this.lewisInit();
+        other.lewisRemove();
+        other.isStable();
+        other.lewisInit();
     }
 }
 class DOMCompound {
