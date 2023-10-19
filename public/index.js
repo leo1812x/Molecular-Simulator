@@ -6,6 +6,7 @@ let { elements, symbols, numbers } = pt;
 //! Set up
 const SIMULATOR = document.getElementById('simulator');
 let objects = [];
+//! Clases
 class DOMObject {
     //*for DOM
     static id = 0;
@@ -42,7 +43,7 @@ class DOMObject {
     //?TODO i think i need a different implementation for DOMElement and DOMCompound
     collisionCheck() { }
     //*Chemistry 
-    //? should i do something better with this?
+    //? is there a better way to do this?
     bond(other) {
         //*element with element
         if (other instanceof DOMElemento && this instanceof DOMElemento) {
@@ -64,10 +65,10 @@ class DOMObject {
         }
         //*element with compound
         else if (this instanceof DOMElemento && other instanceof DOMCompound) { }
-        ;
+        //*compound with compound
+        else if (this instanceof DOMCompound && other instanceof DOMCompound) { }
     }
 }
-//! Classes
 class DOMElemento extends DOMObject {
     element;
     //*for bonds
@@ -155,17 +156,13 @@ class DOMElemento extends DOMObject {
         });
     }
     getInitialLevel() {
-        let { electronicConfiguration } = this.element;
         //*get level of element from Periodic table 
-        this.level = electronicConfiguration[electronicConfiguration.length - 3];
-        // console.log(`level = ${this.level}`);
+        this.level = this.element.electronicConfiguration[this.element.electronicConfiguration.length - 3];
         return this.level;
     }
     getInitialLetter() {
-        let { electronicConfiguration } = this.element;
         //*get letter of element from Periodic table 
-        this.letter = electronicConfiguration[electronicConfiguration.length - 2];
-        // console.log(`letter = ${this.letter}`);
+        this.letter = this.element.electronicConfiguration[this.element.electronicConfiguration.length - 2];
         return this.letter;
     }
     getInitialValenceNumber() {
@@ -184,22 +181,30 @@ class DOMElemento extends DOMObject {
         }
         return this.valenceNumber;
     }
+    //*get the max # of electron the element needs on its valence shell to be stable
     getMaxNumberInLevel() {
-        switch (this.letter) {
-            case "s":
-                this.max = 2;
-                break;
-            case "p":
-                this.max = 8;
-                break;
-            case "d":
-                this.max = 2;
-                break;
-            case "f":
-                this.max = 2;
-                break;
-            default:
-                throw new Error("check this lol");
+        let { groupBlock, symbol } = this.element;
+        //*handle the hydrogen and Helium exceptions  first
+        if (symbol === 'H' || symbol === 'He') {
+            this.max = 2;
+        }
+        //*this list contains the groups of elements with s or p blocks ('Main group')
+        //https://en.wikipedia.org/wiki/Valence_electron#Valence_shell
+        else if (['alkali metal',
+            'alkaline earth metal',
+            'metalloid', 'nonmetal',
+            'halogen', 'noble gas',
+            'other metal', 'post-transition metal'].includes(groupBlock)) {
+            this.max = 8;
+        }
+        //*d block
+        else if (groupBlock === 'transition metal') {
+            this.max = 18;
+        }
+        //*f block
+        else if (groupBlock === 'lanthanoid' ||
+            groupBlock === 'actinoid') {
+            this.max = 32;
         }
         return this.max;
     }
@@ -228,31 +233,47 @@ class DOMElemento extends DOMObject {
         }
     }
     ionBond(other) {
+        //TODO currently works with one electron only
         //* find most and least electronegative
-        let moreNegative = (this.element.electronegativity > other.element.electronegativity) ? this : other;
-        let lessNegative = (this.element.electronegativity < other.element.electronegativity) ? this : other;
+        let moreNegative = this.findMoreNegative(other);
+        let lessNegative = this.findLessNegative(other);
         console.log('Ionic bond!');
         moreNegative.valenceNumber += 1;
         lessNegative.valenceNumber -= 1;
     }
     covalentBond(other) {
+        this.valenceNumber += 1;
+        other.valenceNumber += 1;
         console.log('covalent bond!');
     }
+    findMoreNegative(other) {
+        return (this.element.electronegativity > other.element.electronegativity) ? this : other;
+    }
+    findLessNegative(other) {
+        return (this.element.electronegativity < other.element.electronegativity) ? this : other;
+    }
 }
-class DOMCompound {
+class DOMCompound extends DOMObject {
     constructor(...element) {
+        super(element);
         elements;
     }
 }
 //! Testing
-// let circle = new DOMElemento(elements.Helium);
+let circle = new DOMElemento(symbols.Ca);
+let circle6 = new DOMElemento(symbols.O);
 let circle1 = new DOMElemento(numbers[2]);
 // let circle4 = new DOMElemento(numbers[3]);
-// let circle5 = new DOMElemento(symbols.O);
+let circle5 = new DOMElemento(symbols.F);
 let circle2 = new DOMElemento(symbols.Na);
 let circle3 = new DOMElemento(symbols.Cl);
 // let circle6 = new DOMElemento(numbers[1]);
 // let circle7 = new DOMElemento(numbers[85]);
 circle3.html.style.left = '200px';
+circle5.html.style.left = '500px';
+circle5.html.style.top = '150px';
 circle1.html.style.left = '300px';
+circle1.html.style.top = '400px';
+circle.html.style.top = '300px';
+circle6.html.style.top = '450px';
 //# sourceMappingURL=index.js.map
