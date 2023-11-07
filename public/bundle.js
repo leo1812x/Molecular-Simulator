@@ -53038,6 +53038,7 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 const renderer = new THREE.WebGLRenderer();
 //*set the renderer on its place
 renderer.setSize(SIMULATOR.getBoundingClientRect().width, SIMULATOR.getBoundingClientRect().height);
+renderer.setPixelRatio(window.devicePixelRatio);
 document.getElementById('simulator').appendChild(renderer.domElement);
 //*testing cube
 const geometry = new THREE.BoxGeometry(1, 1, 1);
