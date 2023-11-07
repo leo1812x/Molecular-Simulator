@@ -2,9 +2,44 @@
 var pt = require('periodic-table');
 let {elements, symbols, numbers} = pt;
 
+import * as THREE from 'three';
+
+
 //! Set up
 const SIMULATOR = document.getElementById('simulator');
 let objects: DOMObject[] = [];
+
+
+//!THREE.JS 
+//*basic set up
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+const renderer = new THREE.WebGLRenderer();
+
+//*set the renderer on its place
+renderer.setSize( SIMULATOR.getBoundingClientRect().width, SIMULATOR.getBoundingClientRect().height );
+document.getElementById('simulator').appendChild(renderer.domElement)
+
+//*testing cube
+const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+const cube = new THREE.Mesh( geometry, material );
+scene.add( cube );
+
+camera.position.z = 5;
+
+function animate() {
+	requestAnimationFrame( animate );
+
+	cube.rotation.x += 0.01;
+	cube.rotation.y += 0.01;
+
+	renderer.render( scene, camera );
+}
+
+animate();
+
+
 
 //! Clases
 class DOMObject {
