@@ -6,10 +6,6 @@ import { OrbitControls } from 'three/examples/jsm/Addons.js';
 
 import periodic_table from './periodic_table/periodic_table';
 
-let pt = periodic_table.number(1);
-
-// let pt = require('periodic-table')
-
 //! Set up
 const SIMULATOR = document.getElementById('simulator');
 let objects: DOMObject[] = [];
@@ -21,47 +17,32 @@ const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.inner
 const renderer = new THREE.WebGLRenderer();
 const controls = new OrbitControls(camera, renderer.domElement);
 const gridHelper = new THREE.GridHelper(50, 20);
-
-//*set the renderer on its place
-renderer.setSize( SIMULATOR.getBoundingClientRect().width, SIMULATOR.getBoundingClientRect().height );
-renderer.setPixelRatio(window.devicePixelRatio)
-document.getElementById('simulator').appendChild(renderer.domElement)
-
-//*testing cube
-// const geometry = new THREE.BoxGeometry( 1, 1, 1 );
-// const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-// const cube = new THREE.Mesh( geometry, material );
-// cube.position.x += 2;
-
-scene.add( gridHelper ); //add cube here
-
+scene.add( gridHelper );
 camera.position.z = 5;
 
-function animate() {
-	requestAnimationFrame( animate );
 
-	// cube.rotation.x += 0.01;
-	// cube.rotation.y += 0.01;
+//*set the renderer on the DOM
+renderer.setSize( SIMULATOR.getBoundingClientRect().width, SIMULATOR.getBoundingClientRect().height );
+renderer.setPixelRatio(window.devicePixelRatio)
+SIMULATOR.appendChild(renderer.domElement)
 
-	renderer.render( scene, camera );
-}
-
-animate();
 
 
 
 //! Clases
 class DOMObject {
     //*for DOM
-    static id:number = 0;
+    static idCounter:number = 0;
     html:HTMLElement;
     hold:boolean;
+    id:number
+    ball:THREE.Mesh
 
     constructor(element){
         //* create HTML div
         this.html = document.createElement('div');
-        this.html.setAttribute('id', DOMElemento.id.toString());
-        DOMObject.id++;
+        this.html.setAttribute('id', DOMElemento.idCounter.toString());
+        DOMObject.idCounter++;
         
         //*event listeners
         this.html.onpointerdown = () =>{
@@ -131,21 +112,20 @@ class Electron {
     ElectronBall:THREE.Mesh
 
     constructor() {
-        this.ElectronBall = new THREE.Mesh((new THREE.SphereGeometry(0.2)),new THREE.MeshBasicMaterial({color: 0x00ff00}));
-        scene.add(this.ElectronBall);        
+        this.ElectronBall = new THREE.Mesh((new THREE.SphereGeometry(0.2)),new THREE.MeshBasicMaterial({color: 0xf000aa}));
+        scene.add(this.ElectronBall);       
     }
 }
 
 class DOMElemento extends DOMObject{
     element;
-
+    id = DOMObject.idCounter;
     //*for bonds
     level:number;
     letter:string;
     valenceNumber:number;
     max:number;
     bonded:boolean;
-    ball:THREE.Mesh
     electrons: Electron[]
 
 
@@ -157,19 +137,16 @@ class DOMElemento extends DOMObject{
         this.electrons = [];
 
         //*set three.js atributes
-        this.ball = new THREE.Mesh((new THREE.SphereGeometry(0.5)),new THREE.MeshBasicMaterial({color: 0x00ff00}))
-        scene.add(this.ball);
+        this.ball = new THREE.Mesh((new THREE.SphereGeometry(0.5)),new THREE.MeshBasicMaterial({color: 0xffffff}))
         this.ball.position.y += 1;
+        scene.add(this.ball);
         
-        //*find valenceNumber and add them to three.js
+        //*find the number of valence. then add them as electrons to the scene
         this.initialStability();        
-        this.lewisInit();
-        
-        console.log(this.electrons);
-        
+        this.lewisInit();        
     }
 
-        //*adds the valence electrons to the element in the DOM
+        //*add electrons as valence electrons on its outer shell
     lewisInit():void{
         for (let i = 0; i < this.valenceNumber; i++){
             this.electrons.push(new Electron());
@@ -178,57 +155,44 @@ class DOMElemento extends DOMObject{
         } 
     }
 
-    // lewisRemove():void{
-    //     //*deletes the previus valence electrons in the DOMelemento
-    //     let children = Array.from(this.html.children);
-    //     children.forEach((children) => {
-    //         this.html.removeChild(children);
-    //     })
-    // }
+    lewisRemove():void{
+        //*deletes the previus valence electrons in the scene
+        let children = this.electrons
+        children.forEach((children) => {
+            scene.remove(children.ElectronBall);
+            this.electrons.pop() //?not sure about this line
+        })
+    }
 
-    // move(e):void {
-    //     //*this peace of code gives the coordenates of the click relative to the SIMULATOR
-    //     let rect = SIMULATOR.getBoundingClientRect();
-    //     let x = e.clientX - rect.left; 
-    //     let y = e.clientY - rect.top;  
+    collisionCheck():DOMElemento{
+        if (this.bonded) return;
 
-    //     //*make move
-    //     this.html.style.left = x - 50 + 'px';
-    //     this.html.style.top = y - 50 + 'px'; 
+        //*get circle coordenates
+        let {x, y, z} = this.ball.position
 
-    //     //*keep inside box
-    //     if (x <= 62) this.html.style.left = '12px'; 
-    //     if (y <=62) this.html.style.top = '13px'; 
-    //     if (x >= rect.right - 74) this.html.style.left = (rect.right - 126) + 'px'; 
-    //     if (y >= rect.bottom - 135) this.html.style.top = (rect.bottom - 185) + 'px'; 
-    // }
-
-    // collisionCheck():DOMObject{
-    //     if (this.bonded) return;
-
-    //     //*get circle coordenates
-    //     let current = this.html.getBoundingClientRect();
         
-    //     //*check each element avoiding current
-    //     objects.forEach((other, index) =>{
+        //*check each element avoiding current
+        objects.forEach((other, index) =>{
 
-    //         if (other.html !== this.html){
-    //             //* check other circle coordenates
-    //             let otherx = other.html.getBoundingClientRect().x;
-    //             let othery = other.html.getBoundingClientRect().y;
+            if (this.id != other.id){                
 
-    //             //* distance formula => collision
-    //             let distance = Math.sqrt(Math.pow(otherx - current.x, 2) + Math.pow(othery - current.y, 2))
-    //             // console.log(distance);
+                //* check other circle coordenates
+                let differenceOnXs = Math.abs(x - other.ball.position.x);
+                let differenceOnYs = Math.abs(y - other.ball.position.y);
+                let differenceOnZs = Math.abs(z - other.ball.position.z);
+
+                //* distance formula (3d pythagoras theorem)
+                let distance = Math.sqrt(Math.pow(differenceOnXs, 2) + Math.pow(differenceOnYs, 2) + Math.pow(differenceOnZs, 2));
                 
-    //             //* crash
-    //             if (distance < 100){                    
-    //                 this.bond(other);
-    //                 return other;
-    //             }
-    //         }
-    //     })
-    // }
+                
+                //* crash
+                if (distance < 1){  
+                    this.bond(other);
+                    return other;
+                }
+            }
+        })
+    }
 
     getInitialLevel():number{
         //*get level of element from Periodic table 
@@ -292,15 +256,18 @@ class DOMElemento extends DOMObject{
     }
 
     updateStability():void{
-        // this.lewisRemove();
+        this.lewisRemove();
         this.isStable();
-        // this.lewisInit();
+        this.lewisInit();
     }
 
     isStable():boolean{
         //*turn green if stable
+        
         if (this.valenceNumber === 0 || this.valenceNumber === this.max){
-            this.html.style.backgroundColor = 'green';
+            console.log('stable');
+
+            this.ball.material = new THREE.MeshBasicMaterial({color: 0x00ff00});
             return true;
             }
             
@@ -341,5 +308,25 @@ class DOMCompound extends DOMObject{
         // elements
     }
 }
+//!TESTING:
+
 
 let example = new DOMElemento(periodic_table.number(1));
+let examplew = new DOMElemento(periodic_table.number(2));
+example.ball.position.x = -2;
+example.ball.position.y = -2;
+
+//*animation loop
+function animate() {
+	requestAnimationFrame( animate );
+
+    //*TEST ANIMATIONS HERE:
+    example.ball.position.x += 0.001;
+    example.ball.position.y += 0.001;
+
+    example.collisionCheck();
+
+
+
+	renderer.render( scene, camera );
+} animate();
