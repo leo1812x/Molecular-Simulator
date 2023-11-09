@@ -4,6 +4,12 @@ import './styles/simulator.css'
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 
+import periodic_table from './periodic_table/periodic_table';
+
+let pt = periodic_table.number(1);
+
+// let pt = require('periodic-table')
+
 //! Set up
 const SIMULATOR = document.getElementById('simulator');
 let objects: DOMObject[] = [];
@@ -22,20 +28,20 @@ renderer.setPixelRatio(window.devicePixelRatio)
 document.getElementById('simulator').appendChild(renderer.domElement)
 
 //*testing cube
-const geometry = new THREE.BoxGeometry( 1, 1, 1 );
-const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-const cube = new THREE.Mesh( geometry, material );
-cube.position.x += 2;
+// const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+// const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+// const cube = new THREE.Mesh( geometry, material );
+// cube.position.x += 2;
 
-scene.add( cube, gridHelper );
+scene.add( gridHelper ); //add cube here
 
 camera.position.z = 5;
 
 function animate() {
 	requestAnimationFrame( animate );
 
-	cube.rotation.x += 0.01;
-	cube.rotation.y += 0.01;
+	// cube.rotation.x += 0.01;
+	// cube.rotation.y += 0.01;
 
 	renderer.render( scene, camera );
 }
@@ -124,11 +130,9 @@ class DOMObject {
 class Electron {
     ElectronBall:THREE.Mesh
 
-    constructor(position?) {
-        this.ElectronBall = new THREE.Mesh((new THREE.CircleGeometry(0.2)),new THREE.MeshBasicMaterial({color: 0x00ff00}));
-        scene.add(this.ElectronBall);
-        console.log('working');
-        
+    constructor() {
+        this.ElectronBall = new THREE.Mesh((new THREE.SphereGeometry(0.2)),new THREE.MeshBasicMaterial({color: 0x00ff00}));
+        scene.add(this.ElectronBall);        
     }
 }
 
@@ -150,6 +154,7 @@ class DOMElemento extends DOMObject{
 
         //not sure if structuredClone() is necessary
         this.element = structuredClone(element);
+        this.electrons = [];
 
         //*set three.js atributes
         this.ball = new THREE.Mesh((new THREE.SphereGeometry(0.5)),new THREE.MeshBasicMaterial({color: 0x00ff00}))
@@ -159,13 +164,17 @@ class DOMElemento extends DOMObject{
         //*find valenceNumber and add them to three.js
         this.initialStability();        
         this.lewisInit();
+        
+        console.log(this.electrons);
+        
     }
 
         //*adds the valence electrons to the element in the DOM
     lewisInit():void{
         for (let i = 0; i < this.valenceNumber; i++){
-            this.electrons[i] = new Electron();
+            this.electrons.push(new Electron());
             this.electrons[i].ElectronBall.position.x = 2;
+
         } 
     }
 
@@ -333,5 +342,4 @@ class DOMCompound extends DOMObject{
     }
 }
 
-
-let example = new DOMElemento('c');
+let example = new DOMElemento(periodic_table.number(1));
