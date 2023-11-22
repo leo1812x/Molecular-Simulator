@@ -26,33 +26,31 @@ type element = {
 let xd = JSON.parse(JSON.stringify(pt)).default;
 
 function symbol(symbol:string):element{
-    xd.forEach((element) => {
-        if (element.symbol == symbol){
-            return element;
+    for (let i = 0; i < xd.length; i++){           
+        if (xd[i].symbol === symbol){            
+            return xd[i];
         }
-    })
+    }
     throw new Error("element not found");
 }
 
 function name(name:string):element{
-    xd.forEach((element) =>{
-        if (element.name == name){
-            return element;
+    for (let i = 0; i < xd.length; i++){           
+        if (xd[i].name === name){            
+            return xd[i];
         }
-    })
+    }
     throw new Error("element not found");
 }
 
 function number(number:number):element | void{
 
-    let element = xd
-    for (let i = 0; i < xd.length; i++){
-                
-        if (element[i].atomicNumber === number){            
-            return element[i];
+    for (let i = 0; i < xd.length; i++){           
+        if (xd[i].atomicNumber === number){            
+            return xd[i];
         }
     }
-
+    throw new Error("element not found");
 }
 
 export default {number, name, symbol}

@@ -3,15 +3,13 @@ import './styles/simulator.css'
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
-
 import periodic_table from './periodic_table/periodic_table';
 
-//! Set up
+//!Set up
 const SIMULATOR = document.getElementById('simulator');
-let objects: DOMObject[] = [];
+let objects: ThreeObject[] = [];
 
-//!THREE.JS 
-//*basic set up
+//!THREE.JS  set up
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 const renderer = new THREE.WebGLRenderer();
@@ -20,76 +18,60 @@ const gridHelper = new THREE.GridHelper(50, 20);
 scene.add( gridHelper );
 camera.position.z = 5;
 
-
 //*set the renderer on the DOM
 renderer.setSize( SIMULATOR.getBoundingClientRect().width, SIMULATOR.getBoundingClientRect().height );
 renderer.setPixelRatio(window.devicePixelRatio)
 SIMULATOR.appendChild(renderer.domElement)
 
+//* HOOKE'S LAW
+const K = 1;        //sprig constant
+const D = 1;        //default distance
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 //! Clases
-class DOMObject {
-    //*for DOM
+class ThreeObject {
     static idCounter:number = 0;
-    html:HTMLElement;
-    hold:boolean;
     id:number
     ball:THREE.Mesh
 
-    constructor(element){
-        //* create HTML div
-        this.html = document.createElement('div');
-        this.html.setAttribute('id', DOMElemento.idCounter.toString());
-        DOMObject.idCounter++;
-        
-        //*event listeners
-        this.html.onpointerdown = () =>{
-            this.hold = true;
-            this.html.style.left = '0%';
-            this.html.style.top = '0%;';
-        }
+    constructor(){
+        ThreeObject.idCounter++;  
+        this.id = ThreeObject.idCounter;
 
-        this.html.onpointerup = () => {
-            this.hold = false;
-        }
-
-        //TODO this needs to be fixed so the borders fuction correcly
-        this.html.onmouseout = (e) =>{
-            if (this.hold){
-                this.move(e);
-                this.collisionCheck();
-            }
-        }
-
-        //* append to simulator and array of object in the simulator
-        SIMULATOR.append(this.html);
+        //push to list with all objects
         objects.push(this);
     }
 
-    //*Movement
-    //?TODO
-    move(e):void {}
-
-    //?TODO i think i need a different implementation for DOMElement and DOMCompound
-    collisionCheck(){}
 
     //*Chemistry 
     //? is there a better way to do this?
-    bond(other:DOMObject):void{
+    bond(other:ThreeObject):void{
 
         //*element with element
-        if (other instanceof DOMElemento && this instanceof DOMElemento){
-            //*don't bond if stable
+        if (other instanceof ThreeElement && this instanceof ThreeElement){
+            //don't bond if stable
             if (this.isStable() || other.isStable()){return;}
 
-            //*check for Ion bond
+            //check for Ion bond
             if (Math.abs(this.element.electronegativity - other.element.electronegativity) > 1.7){
                 this.ionBond(other);
             }
 
-            //*check for covalent bond
+            //check for covalent bond
             else if (Math.abs(this.element.electronegativity - other.element.electronegativity) < 1.7){
                 this.covalentBond(other);
             }
@@ -100,100 +82,44 @@ class DOMObject {
         }
 
         //*element with compound
-        else if (this instanceof DOMElemento && other instanceof DOMCompound){}
+        else if (this instanceof ThreeElement && other instanceof THREECompound){}
 
         //*compound with compound
-        else if (this instanceof DOMCompound && other instanceof DOMCompound){}
-
+        else if (this instanceof THREECompound && other instanceof THREECompound){}
     }
 }
 
-class Electron {
-    ElectronBall:THREE.Mesh
 
-    constructor() {
-        this.ElectronBall = new THREE.Mesh((new THREE.SphereGeometry(0.2)),new THREE.MeshBasicMaterial({color: 0xf000aa}));
-        scene.add(this.ElectronBall);       
-    }
-}
-
-class DOMElemento extends DOMObject{
+class ThreeElement extends ThreeObject{
     element;
-    id = DOMObject.idCounter;
     //*for bonds
     level:number;
     letter:string;
     valenceNumber:number;
     max:number;
     bonded:boolean;
-    electrons: Electron[]
+    electrons: number;
 
 
-    constructor(element) { //!HTML
-        super(element);
+    constructor(element) {
+        super();
 
         //not sure if structuredClone() is necessary
         this.element = structuredClone(element);
-        this.electrons = [];
+        this.electrons = 0;
 
         //*set three.js atributes
         this.ball = new THREE.Mesh((new THREE.SphereGeometry(0.5)),new THREE.MeshBasicMaterial({color: 0xffffff}))
         this.ball.position.y += 1;
         scene.add(this.ball);
         
+        //*letter in ball
+
         //*find the number of valence. then add them as electrons to the scene
         this.initialStability();        
         this.lewisInit();        
     }
-
-        //*add electrons as valence electrons on its outer shell
-    lewisInit():void{
-        for (let i = 0; i < this.valenceNumber; i++){
-            this.electrons.push(new Electron());
-            this.electrons[i].ElectronBall.position.x = 2;
-
-        } 
-    }
-
-    lewisRemove():void{
-        //*deletes the previus valence electrons in the scene
-        let children = this.electrons
-        children.forEach((children) => {
-            scene.remove(children.ElectronBall);
-            this.electrons.pop() //?not sure about this line
-        })
-    }
-
-    collisionCheck():DOMElemento{
-        if (this.bonded) return;
-
-        //*get circle coordenates
-        let {x, y, z} = this.ball.position
-
-        
-        //*check each element avoiding current
-        objects.forEach((other, index) =>{
-
-            if (this.id != other.id){                
-
-                //* check other circle coordenates
-                let differenceOnXs = Math.abs(x - other.ball.position.x);
-                let differenceOnYs = Math.abs(y - other.ball.position.y);
-                let differenceOnZs = Math.abs(z - other.ball.position.z);
-
-                //* distance formula (3d pythagoras theorem)
-                let distance = Math.sqrt(Math.pow(differenceOnXs, 2) + Math.pow(differenceOnYs, 2) + Math.pow(differenceOnZs, 2));
-                
-                
-                //* crash
-                if (distance < 1){  
-                    this.bond(other);
-                    return other;
-                }
-            }
-        })
-    }
-
+    //!methods to find initial info ->
     getInitialLevel():number{
         //*get level of element from Periodic table 
         this.level = this.element.electronicConfiguration[this.element.electronicConfiguration.length - 3];
@@ -219,7 +145,6 @@ class DOMElemento extends DOMObject{
 
         return this.valenceNumber;
     }
-
     //*get the max # of electron the element needs on its valence shell to be stable
     getMaxNumberInLevel():number{
         let {groupBlock, symbol} = this.element;
@@ -247,12 +172,33 @@ class DOMElemento extends DOMObject{
         return this.max
     }
 
-    initialStability():void{
-        this.getInitialLevel();
-        this.getInitialLetter();
-        this.getInitialValenceNumber();
-        this.getMaxNumberInLevel();
-        this.isStable();
+
+    //!methods to deal with chemistry info ->
+    //*add electrons as valence electrons on its outer shell
+    lewisInit():void{
+        for (let i = 0; i < this.valenceNumber; i++){
+            this.electrons += 1;            
+        } 
+    }
+
+    lewisRemove():void{
+        //*deletes the previus valence electrons in the scene
+        this.electrons = 0;
+    }
+
+    isStable():boolean{
+        //*turn green if stable
+        
+        if (this.valenceNumber === 0 || this.valenceNumber === this.max){
+            this.ball.material = new THREE.MeshBasicMaterial({color: 0x00ff00});
+            return true;
+            }
+            
+        //*turn red if inestable
+        else{
+            this.ball.material = new THREE.MeshBasicMaterial({color: 0xff0000});
+            return false;
+        }
     }
 
     updateStability():void{
@@ -261,19 +207,21 @@ class DOMElemento extends DOMObject{
         this.lewisInit();
     }
 
-    isStable():boolean{
-        //*turn green if stable
-        
-        if (this.valenceNumber === 0 || this.valenceNumber === this.max){
-            console.log('stable');
+    initialStability():void{
+        this.getInitialLevel();
+        this.getInitialLetter();
+        this.getInitialValenceNumber();
+        this.getMaxNumberInLevel();
+        this.isStable();
+    }
 
-            this.ball.material = new THREE.MeshBasicMaterial({color: 0x00ff00});
-            return true;
-            }
-            
-        //*turn red if inestable
-        else {this.html.style.backgroundColor = 'red';
-              return false;}
+    //!methods to deal with bonds
+    findMoreNegative(other):ThreeElement{
+        return (this.element.electronegativity > other.element.electronegativity) ? this : other;
+    }
+
+    findLessNegative(other):ThreeElement{
+        return (this.element.electronegativity < other.element.electronegativity) ? this : other;
     }
 
     ionBond(other){
@@ -293,40 +241,140 @@ class DOMElemento extends DOMObject{
         console.log('covalent bond!'); 
     }
 
-    findMoreNegative(other):DOMElemento{
-        return (this.element.electronegativity > other.element.electronegativity) ? this : other;
-    }
+    //!methods to deal with physics
+    collisionCheck():ThreeElement{
+        if (this.bonded) return;
 
-    findLessNegative(other):DOMElemento{
-        return (this.element.electronegativity < other.element.electronegativity) ? this : other;
+        //*get circle coordenates
+        let {x, y, z} = this.ball.position
+
+        
+        //*check each element 
+        objects.forEach((other, index) =>{
+
+
+
+
+
+            //*avoiding current element
+            if (this.id != other.id){                
+
+                getdistance(this, other);
+
+
+                //*get differences on each axis
+                let differenceOnXs = Math.abs(x - other.ball.position.x);
+                let differenceOnYs = Math.abs(y - other.ball.position.y);
+                let differenceOnZs = Math.abs(z - other.ball.position.z);
+
+                //* distance formula (3d pythagoras theorem)
+                let distance = Math.sqrt(Math.pow(differenceOnXs, 2) + Math.pow(differenceOnYs, 2) + Math.pow(differenceOnZs, 2));
+                console.log(distance);
+                
+                
+                //* crash
+                if (distance < 1){  
+                    this.bond(other);
+                    return other;
+                }
+            }
+        })
     }
 }
 
-class DOMCompound extends DOMObject{
-    constructor(...element:DOMElemento[] | DOMCompound[]){
-        super(element);
-        // elements
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class THREEBond{
+    elements:ThreeElement[];
+    color:string;
+    lenght:number;
+
+    constructor(first:ThreeElement, second:ThreeElement){
+        
     }
 }
+
+class THREECompound extends ThreeObject{
+    elements: ThreeElement[];
+    group: THREE.Group;
+    
+
+    constructor(...elements){
+        super();
+        this.group = new THREE.Group;
+        this.elements = [];
+        for (let i = 0; i < elements.length; i++){
+            let newElement = new ThreeElement(elements[i]);
+            this.group.add(newElement.ball);
+            this.elements.push(newElement);
+            
+        }
+        scene.add(this.group);
+        this.elements[0].ball.position.x += 2;
+    }
+
+     getSpringEnergy(x:number):number{
+        return 0.5 * K * Math.pow(x - D, 2);
+    }
+
+}
+
+function getdistance(thisElement:ThreeObject, otherElement:ThreeObject):number{
+        //*get circles coordenates
+        let {x, y, z} = thisElement.ball.position;
+        let {x: otherX, y: otherY, z: otherZ} = otherElement.ball.position;
+
+        //*get differences on each axis
+        let differenceOnXs = Math.abs(x - otherX);
+        let differenceOnYs = Math.abs(y - otherY);
+        let differenceOnZs = Math.abs(z - otherZ);
+
+        //* distance formula (3d pythagoras theorem)
+        let distance = Math.sqrt(Math.pow(differenceOnXs, 2) + Math.pow(differenceOnYs, 2) + Math.pow(differenceOnZs, 2));
+        console.log(distance);
+        return distance;
+}
+
+
+
+
+
+
+
+
 //!TESTING:
 
+// let example = new ThreeElement(periodic_table.number(1));
+// let examplew = new ThreeElement(periodic_table.number(1));
+// example.ball.position.x = -1;
+// example.ball.position.y = -1;
 
-let example = new DOMElemento(periodic_table.number(1));
-let examplew = new DOMElemento(periodic_table.number(2));
-example.ball.position.x = -2;
-example.ball.position.y = -2;
+let compoundExample = new THREECompound(periodic_table.number(1), periodic_table.symbol('H'));    
+
 
 //*animation loop
 function animate() {
 	requestAnimationFrame( animate );
-
-    //*TEST ANIMATIONS HERE:
-    example.ball.position.x += 0.001;
-    example.ball.position.y += 0.001;
-
-    example.collisionCheck();
-
+    //!TEST ANIMATIONS HERE:
+    compoundExample.group.position.y += 0.02;
+    getdistance(compoundExample.elements[0], compoundExample.elements[1]);
 
 
 	renderer.render( scene, camera );
 } animate();
+
