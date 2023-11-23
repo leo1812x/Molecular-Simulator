@@ -7,7 +7,7 @@ import periodic_table from './periodic_table/periodic_table';
 
 //!Set up
 const SIMULATOR = document.getElementById('simulator');
-let objects: ThreeObject[] = [];
+let AllElements: ThreeElement[] = [];
 
 //!THREE.JS  set up
 const scene = new THREE.Scene();
@@ -27,9 +27,58 @@ SIMULATOR.appendChild(renderer.domElement)
 const K = 1;        //sprig constant
 const D = 1;        //default distance
 
+//! Functions
+
+//*get distance between two elements
+function getdistance(thisElement:ThreeElement, otherElement:ThreeElement):number{
+    //*get circles coordenates
+    let {x, y, z} = thisElement.ball.position;
+    let {x: otherX, y: otherY, z: otherZ} = otherElement.ball.position;
+
+    //*get differences on each axis
+    let differenceOnXs = Math.abs(x - otherX);
+    let differenceOnYs = Math.abs(y - otherY);
+    let differenceOnZs = Math.abs(z - otherZ);    
+
+    //* distance formula (3d pythagoras theorem)
+    let distance = Math.sqrt(Math.pow(differenceOnXs, 2) + Math.pow(differenceOnYs, 2) + Math.pow(differenceOnZs, 2));
+    return distance;
+}
+
+//*get angle using cosine law
+function getAngle(a:ThreeElement, b:ThreeElement, c:ThreeElement):number{
+    //*get distances
+    let ac = getdistance(a, c);
+    let ab = getdistance(a, b);
+    let bc = getdistance(b, c);
+
+    //*cosine law
+    //in radians
+    let angle = Math.acos((Math.pow(ac, 2) + Math.pow(ab, 2) - Math.pow(bc, 2)) / (2 * ac * ab));
+    let degrees = radiansToDegrees(angle);
+    
+    return degrees;
+}
+
+function radiansToDegrees(radians:number):number{
+    return radians * (180 / Math.PI);
+}
 
 
 
+//! hookes law: POTENTIAL ENERGY
+
+//*elastic potential energy: distance
+function getDistanceEnergy(first:ThreeElement, second:ThreeElement):number{
+    let answer = 0.5 * K * Math.pow(getdistance(first, second) - D, 2);    
+    return answer;
+}
+
+//*elastic potential energy: angle
+function getAnglesEnergy(first:ThreeElement, second:ThreeElement):number{
+    let answer = 0.5 * K * Math.pow(getdistance(first, second) - D, 2);    
+    return answer;
+}
 
 
 
@@ -52,8 +101,6 @@ class ThreeObject {
         ThreeObject.idCounter++;  
         this.id = ThreeObject.idCounter;
 
-        //push to list with all objects
-        objects.push(this);
     }
 
 
@@ -81,13 +128,27 @@ class ThreeObject {
             other.updateStability();
         }
 
-        //*element with compound
+        //?element with compound
         else if (this instanceof ThreeElement && other instanceof THREECompound){}
 
-        //*compound with compound
+        //?compound with compound
         else if (this instanceof THREECompound && other instanceof THREECompound){}
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 class ThreeElement extends ThreeObject{
@@ -107,6 +168,7 @@ class ThreeElement extends ThreeObject{
         //not sure if structuredClone() is necessary
         this.element = structuredClone(element);
         this.electrons = 0;
+        AllElements.push(this);
 
         //*set three.js atributes
         this.ball = new THREE.Mesh((new THREE.SphereGeometry(0.5)),new THREE.MeshBasicMaterial({color: 0xffffff}))
@@ -244,37 +306,14 @@ class ThreeElement extends ThreeObject{
     //!methods to deal with physics
     collisionCheck():ThreeElement{
         if (this.bonded) return;
-
-        //*get circle coordenates
-        let {x, y, z} = this.ball.position
-
         
         //*check each element 
-        objects.forEach((other, index) =>{
-
-
-
-
-
+        AllElements.forEach((other, index) =>{
             //*avoiding current element
             if (this.id != other.id){                
-
-                getdistance(this, other);
-
-
-                //*get differences on each axis
-                let differenceOnXs = Math.abs(x - other.ball.position.x);
-                let differenceOnYs = Math.abs(y - other.ball.position.y);
-                let differenceOnZs = Math.abs(z - other.ball.position.z);
-
-                //* distance formula (3d pythagoras theorem)
-                let distance = Math.sqrt(Math.pow(differenceOnXs, 2) + Math.pow(differenceOnYs, 2) + Math.pow(differenceOnZs, 2));
-                console.log(distance);
-                
-                
                 //* crash
-                if (distance < 1){  
-                    this.bond(other);
+                if (getdistance(this, other) < 1){  
+                    this.bond(other);                    
                     return other;
                 }
             }
@@ -309,45 +348,117 @@ class THREEBond{
     }
 }
 
+
+
+
+
+
+
+
+
+
+
+
 class THREECompound extends ThreeObject{
     elements: ThreeElement[];
     group: THREE.Group;
     
 
-    constructor(...elements){
+    constructor(...newElements){
+        
         super();
         this.group = new THREE.Group;
         this.elements = [];
-        for (let i = 0; i < elements.length; i++){
-            let newElement = new ThreeElement(elements[i]);
+        const fixedLenght = newElements.length;        
+
+        for (let i = 0; i < fixedLenght; i++){            
+            let newElement = new ThreeElement(newElements[i]);
             this.group.add(newElement.ball);
             this.elements.push(newElement);
-            
+            newElements.push(newElement);
         }
         scene.add(this.group);
-        this.elements[0].ball.position.x += 2;
     }
 
-     getSpringEnergy(x:number):number{
-        return 0.5 * K * Math.pow(x - D, 2);
+    getMolecularGeometry():void{
+        let vsepr:string;
+        let centralElement = this.elements[0];
+
+        
+
+
+
+        //*Kepert model for transition metals
+        //https://en.wikipedia.org/wiki/VSEPR_theory#Transition_metals_(Kepert_model)
+        if (centralElement.element.groupBlock === "transition metal"){
+            //? will do some day
+        }
+
+        //*VSEPR theory for main group elements
+        //https://en.wikipedia.org/wiki/VSEPR_theory#Main-group_elements
+        else{
+        switch (vsepr) {
+            case "202": //linear
+
+            break;
+       
+            case "213": //bent (119)
+            break;
+
+            case "224": //bent (109.5)
+            break;
+
+            case "235": //linear
+            break;
+
+            case "303": //trignonal planar
+            break;
+
+            case "314": //trignonal pyramidal
+            break;
+
+            case "235": //t-shaped
+            break;
+
+            case "404": //tetrahedral
+            break;
+
+            case "415": //seesaw
+            break;
+
+            case "426": //square planar
+            break;
+
+            case "505": //triangular bipyramidal
+            break;
+
+            case "516": //square pyramidal
+            break;
+
+            case "527": //pentagonal bipyramidal
+            break;
+
+            case "606": //octahedral
+            break;
+
+            case "617": //pentaagonal pyramidal
+            break;
+
+            case "707": //pentagonal bipyramidal
+            break;
+
+            case "808": //square antiprismatic
+            break;
+
+            case "909": //tricapped trigonal prismatic
+            break;
+
+            default:
+                console.error('No molecular geometry found');
+            break;
+            }
+        }
     }
-
-}
-
-function getdistance(thisElement:ThreeObject, otherElement:ThreeObject):number{
-        //*get circles coordenates
-        let {x, y, z} = thisElement.ball.position;
-        let {x: otherX, y: otherY, z: otherZ} = otherElement.ball.position;
-
-        //*get differences on each axis
-        let differenceOnXs = Math.abs(x - otherX);
-        let differenceOnYs = Math.abs(y - otherY);
-        let differenceOnZs = Math.abs(z - otherZ);
-
-        //* distance formula (3d pythagoras theorem)
-        let distance = Math.sqrt(Math.pow(differenceOnXs, 2) + Math.pow(differenceOnYs, 2) + Math.pow(differenceOnZs, 2));
-        console.log(distance);
-        return distance;
 }
 
 
@@ -358,23 +469,37 @@ function getdistance(thisElement:ThreeObject, otherElement:ThreeObject):number{
 
 
 //!TESTING:
-
+//*crate
+let compoundExample = new THREECompound(periodic_table.number(6),periodic_table.number(1), periodic_table.symbol('H'));    
 // let example = new ThreeElement(periodic_table.number(1));
 // let examplew = new ThreeElement(periodic_table.number(1));
-// example.ball.position.x = -1;
-// example.ball.position.y = -1;
 
-let compoundExample = new THREECompound(periodic_table.number(1), periodic_table.symbol('H'));    
+
+//*position
+// example.ball.position.x = -2;
+compoundExample.elements[1].ball.position.x = D;
+compoundExample.elements[2].ball.position.x = -D;
+
+let angle = getAngle(compoundExample.elements[0], compoundExample.elements[1], compoundExample.elements[2]);
+console.log(angle);
+
+
+
 
 
 //*animation loop
 function animate() {
 	requestAnimationFrame( animate );
     //!TEST ANIMATIONS HERE:
-    compoundExample.group.position.y += 0.02;
-    getdistance(compoundExample.elements[0], compoundExample.elements[1]);
 
 
+
+
+
+
+
+
+    //!
 	renderer.render( scene, camera );
 } animate();
 
