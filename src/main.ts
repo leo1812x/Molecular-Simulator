@@ -23,9 +23,9 @@ renderer.setSize( SIMULATOR.getBoundingClientRect().width, SIMULATOR.getBounding
 renderer.setPixelRatio(window.devicePixelRatio)
 SIMULATOR.appendChild(renderer.domElement)
 
-//* HOOKE'S LAW
+//* HOOKE'S LAW CONSTANTS
 const K = 1;        //sprig constant
-const D = 1;        //default distance
+const D = 1.25;        //default distance
 
 //! Functions
 
@@ -55,15 +55,17 @@ function getAngle(a:ThreeElement, b:ThreeElement, c:ThreeElement):number{
     //*cosine law
     //in radians
     let angle = Math.acos((Math.pow(ac, 2) + Math.pow(ab, 2) - Math.pow(bc, 2)) / (2 * ac * ab));
-    let degrees = radiansToDegrees(angle);
     
-    return degrees;
+    return angle;
 }
 
 function radiansToDegrees(radians:number):number{
     return radians * (180 / Math.PI);
 }
 
+function degreesToRadians(degrees:number):number{
+    return degrees * (Math.PI / 180);
+}
 
 
 //! hookes law: POTENTIAL ENERGY
@@ -75,9 +77,10 @@ function getDistanceEnergy(first:ThreeElement, second:ThreeElement):number{
 }
 
 //*elastic potential energy: angle
-function getAnglesEnergy(first:ThreeElement, second:ThreeElement):number{
-    let answer = 0.5 * K * Math.pow(getdistance(first, second) - D, 2);    
+function getAnglesEnergy(first:ThreeElement, second:ThreeElement, third:ThreeElement):number{
+    let answer = 0.5 * K * Math.pow(getAngle(first, second, third), 2);    
     return answer;
+
 }
 
 
@@ -384,83 +387,138 @@ class THREECompound extends ThreeObject{
         let vsepr:string;
         let centralElement = this.elements[0];
 
-        
+        VSEPRtheory()
 
-
-
-        //*Kepert model for transition metals
-        //https://en.wikipedia.org/wiki/VSEPR_theory#Transition_metals_(Kepert_model)
-        if (centralElement.element.groupBlock === "transition metal"){
-            //? will do some day
-        }
-
-        //*VSEPR theory for main group elements
-        //https://en.wikipedia.org/wiki/VSEPR_theory#Main-group_elements
-        else{
-        switch (vsepr) {
-            case "202": //linear
-
-            break;
-       
-            case "213": //bent (119)
-            break;
-
-            case "224": //bent (109.5)
-            break;
-
-            case "235": //linear
-            break;
-
-            case "303": //trignonal planar
-            break;
-
-            case "314": //trignonal pyramidal
-            break;
-
-            case "235": //t-shaped
-            break;
-
-            case "404": //tetrahedral
-            break;
-
-            case "415": //seesaw
-            break;
-
-            case "426": //square planar
-            break;
-
-            case "505": //triangular bipyramidal
-            break;
-
-            case "516": //square pyramidal
-            break;
-
-            case "527": //pentagonal bipyramidal
-            break;
-
-            case "606": //octahedral
-            break;
-
-            case "617": //pentaagonal pyramidal
-            break;
-
-            case "707": //pentagonal bipyramidal
-            break;
-
-            case "808": //square antiprismatic
-            break;
-
-            case "909": //tricapped trigonal prismatic
-            break;
-
-            default:
-                console.error('No molecular geometry found');
-            break;
-            }
-        }
     }
 }
 
+function VSEPRtheory(lonePairs?,...elements:ThreeElement[]){
+    //*atoms bonded to central atom
+    let bondedAtoms = elements.length - 1;
+
+    lonePairs = lonePairs || 0;
+    
+    let angle;
+    let str = `${bondedAtoms}${lonePairs}${bondedAtoms + lonePairs}`;
+
+
+    
+
+        //*Kepert model for transition metals
+        //https://en.wikipedia.org/wiki/VSEPR_theory#Transition_metals_(Kepert_model)
+        if (elements[0].element.groupBlock === "transition metal"){
+            console.log('transition metal');
+            //? will do some day
+        }
+
+        else{
+
+            switch (lonePairs) {  
+                         
+                case 0:
+                    switch (elements.length - 1){
+                        case 2: 
+                            angle = 180;
+                            angle = degreesToRadians(angle);
+
+                            //*move the second element to the right position
+                            elements[1].ball.position.x = Math.cos(angle) * D + elements[0].ball.position.x;
+                            elements[1].ball.position.y = Math.sin(angle) * D + elements[0].ball.position.y;
+
+                            //*move the third element to the right position
+                            elements[2].ball.position.x = Math.cos(angle * 2) * D + elements[0].ball.position.x;
+                            elements[2].ball.position.y = Math.sin(angle * 2) * D + elements[0].ball.position.y;
+                        break;
+
+                        case 3:
+                            angle = 120;
+                            angle = degreesToRadians(angle);
+
+                            //*move the second element to the right position
+                            elements[1].ball.position.x = Math.cos(angle) * D + elements[0].ball.position.x;
+                            elements[1].ball.position.y = Math.sin(angle) * D + elements[0].ball.position.y;
+
+                            //*move the third element to the right position
+                            elements[2].ball.position.x = Math.cos(angle * 2) * D + elements[0].ball.position.x;
+                            elements[2].ball.position.y = Math.sin(angle * 2) * D + elements[0].ball.position.y;
+
+                            //*move the fourth element to the right position
+                            elements[3].ball.position.x = Math.cos(angle * 3) * D + elements[0].ball.position.x;
+                            elements[3].ball.position.y = Math.sin(angle * 3) * D + elements[0].ball.position.y;
+                        break;
+
+                        case 4:
+                            angle = 109.5;
+                            angle = degreesToRadians(angle);
+
+                            //*move the second element to the right position
+                            elements[1].ball.position.x = Math.cos(angle) * D + elements[0].ball.position.x;
+                            elements[1].ball.position.y = Math.sin(angle) * D + elements[0].ball.position.y;
+
+                            //*move the third element to the right position
+                            elements[2].ball.position.x = Math.cos(angle * 2) * D + elements[0].ball.position.x;
+                            elements[2].ball.position.y = Math.sin(angle * 2) * D + elements[0].ball.position.y;
+
+                            //*move the fourth element to the right position
+                            elements[3].ball.position.y = Math.cos(angle) * D + elements[0].ball.position.y;
+                            elements[3].ball.position.z = Math.cos(angle) * D + elements[0].ball.position.z;
+
+                    }
+                break;
+    
+                case 1:
+                    //*get angle in radians
+                    angle = 104.45;
+                    angle = degreesToRadians(angle);
+    
+                    //*
+                    //*move the second element to the right position
+                    elements[2].ball.position.x = Math.cos(angle) * D + elements[0].ball.position.x;
+                    elements[2].ball.position.y = Math.sin(angle) * D + elements[0].ball.position.y;
+    
+                    //*get angle in radians
+                    let angle2 = 0;
+                    angle2 = degreesToRadians(angle2);
+    
+                    //*move the third element to the right position
+                    elements[1].ball.position.x = Math.cos(angle2) * D + elements[0].ball.position.x;
+                    elements[1].ball.position.y = Math.sin(angle2) * D + elements[0].ball.position.y;
+    
+    
+                break;
+    
+                case 2:
+                    
+                    switch (elements.length - 1){
+                        case 2:
+                            //*get angle in radians
+                            let angle = 104.45;
+                            angle = degreesToRadians(angle);
+
+                            //*move the second element to the right position
+                            elements[2].ball.position.x = Math.cos(angle) * D + elements[0].ball.position.x;
+                            elements[2].ball.position.y = Math.sin(angle) * D + elements[0].ball.position.y;
+
+                            //*get angle in radians
+                            let angle2 = 0;
+                            angle2 = degreesToRadians(angle2);
+
+                            //*move the third element to the right position
+                            elements[1].ball.position.x = Math.cos(angle2) * D + elements[0].ball.position.x;
+                            elements[1].ball.position.y = Math.sin(angle2) * D + elements[0].ball.position.y;
+                        break;
+                    }
+                break;
+    
+                case 3:
+                break;
+    
+                default:
+                    console.error('No molecular geometry found');
+                break;
+                }
+            }
+    }
 
 
 
@@ -470,19 +528,29 @@ class THREECompound extends ThreeObject{
 
 //!TESTING:
 //*crate
-let compoundExample = new THREECompound(periodic_table.number(6),periodic_table.number(1), periodic_table.symbol('H'));    
-// let example = new ThreeElement(periodic_table.number(1));
-// let examplew = new ThreeElement(periodic_table.number(1));
+let h2o = new THREECompound(periodic_table.number(6),periodic_table.number(1), periodic_table.symbol('H'));    
+let co2 = new THREECompound(periodic_table.symbol('C'),periodic_table.number(6), periodic_table.symbol('O'));
+let bf3 = new THREECompound(periodic_table.symbol('B'),periodic_table.symbol('F'), periodic_table.symbol('F'),periodic_table.symbol('F'));
+let ch4 = new THREECompound(periodic_table.symbol('C'),periodic_table.symbol('H'), periodic_table.symbol('H'),periodic_table.symbol('H'),periodic_table.symbol('H'));
 
+
+//*color
+h2o.elements[0].ball.material = new THREE.MeshBasicMaterial({color: 0x00ff00});
+co2.elements[0].ball.material = new THREE.MeshBasicMaterial({color: 0x00ff00});
+bf3.elements[0].ball.material = new THREE.MeshBasicMaterial({color: 0x00ff00});
+ch4.elements[0].ball.material = new THREE.MeshBasicMaterial({color: 0x00ff00});
 
 //*position
-// example.ball.position.x = -2;
-compoundExample.elements[1].ball.position.x = D;
-compoundExample.elements[2].ball.position.x = -D;
+co2.group.position.x = 5;
+bf3.group.position.x = 10;
+ch4.group.position.x = 15;
 
-let angle = getAngle(compoundExample.elements[0], compoundExample.elements[1], compoundExample.elements[2]);
-console.log(angle);
 
+//*VSEPR theory
+VSEPRtheory(0, co2.elements[0], co2.elements[1], co2.elements[2]);
+VSEPRtheory(2, h2o.elements[0], h2o.elements[1], h2o.elements[2]);
+VSEPRtheory(0, bf3.elements[0], bf3.elements[1], bf3.elements[2], bf3.elements[3]);
+VSEPRtheory(0, ch4.elements[0], ch4.elements[1], ch4.elements[2], ch4.elements[3], ch4.elements[4]);
 
 
 
@@ -491,7 +559,6 @@ console.log(angle);
 function animate() {
 	requestAnimationFrame( animate );
     //!TEST ANIMATIONS HERE:
-
 
 
 
