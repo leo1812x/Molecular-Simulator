@@ -1,9 +1,11 @@
-import './styles/index.css'
-import './styles/simulator.css'
+import './styles/index.css';
+import './styles/simulator.css';
+
+import periodic_table from './periodic_table/periodic_table';
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
-import periodic_table from './periodic_table/periodic_table';
+
 
 //!Set up
 const SIMULATOR = document.getElementById('simulator');
@@ -25,7 +27,7 @@ SIMULATOR.appendChild(renderer.domElement)
 
 //* HOOKE'S LAW CONSTANTS
 const K = 1;        //sprig constant
-const D = 1.25;        //default distance
+const D = 0.7;        //default distance
 
 //! Functions
 
@@ -70,6 +72,10 @@ function degreesToRadians(degrees:number):number{
 
 //! hookes law: POTENTIAL ENERGY
 
+function getPotentialEnergy():number{
+    return 0;
+}
+
 //*elastic potential energy: distance
 function getDistanceEnergy(first:ThreeElement, second:ThreeElement):number{
     let answer = 0.5 * K * Math.pow(getdistance(first, second) - D, 2);    
@@ -83,7 +89,16 @@ function getAnglesEnergy(first:ThreeElement, second:ThreeElement, third:ThreeEle
 
 }
 
+//!force acting
+function getForce(first:ThreeElement, second:ThreeElement):number{
+    // let answernode = math.derivative(getDistanceEnergy(first, second).toString(), 'x');
 
+    // let answer = answernode.evaluate({x: getdistance(first, second)});
+
+
+    // return (answer);
+    return 0;
+}
 
 
 
@@ -340,31 +355,10 @@ class ThreeElement extends ThreeObject{
 
 
 
-
-class THREEBond{
-    elements:ThreeElement[];
-    color:string;
-    lenght:number;
-
-    constructor(first:ThreeElement, second:ThreeElement){
-        
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
 class THREECompound extends ThreeObject{
     elements: ThreeElement[];
     group: THREE.Group;
+    lines: THREE.Line[];
     
 
     constructor(...newElements){
@@ -372,7 +366,8 @@ class THREECompound extends ThreeObject{
         super();
         this.group = new THREE.Group;
         this.elements = [];
-        const fixedLenght = newElements.length;        
+        const fixedLenght = newElements.length; 
+        this.lines = [];       
 
         for (let i = 0; i < fixedLenght; i++){            
             let newElement = new ThreeElement(newElements[i]);
@@ -383,14 +378,52 @@ class THREECompound extends ThreeObject{
         scene.add(this.group);
     }
 
+    makeLines():void{
+        let position = this.elements[0].ball.getWorldPosition(new THREE.Vector3);
+        
+
+
+        for (let i = 1; i < this.elements.length; i++){
+            const thickness = 10000;
+            const color = 0x000000;
+
+            let positioni = this.elements[i].ball.getWorldPosition(new THREE.Vector3);
+
+            const geometry = new THREE.BufferGeometry();
+            geometry.setFromPoints([
+                position,
+                positioni
+            ]);            
+
+            const material = new THREE.LineBasicMaterial({
+                  linewidth: thickness,
+                  vertexColors : true,
+                  blending: THREE.AdditiveBlending,
+                });
+
+
+            let line = new THREE.LineSegments(geometry, material);
+            line.castShadow = true;
+            line.receiveShadow = true;
+            
+            scene.add(line);
+            
+
+            this.lines.push(line);
+        }
+    }
+
+
+
+
     getMolecularGeometry():void{
         let vsepr:string;
         let centralElement = this.elements[0];
-
         VSEPRtheory()
-
     }
 }
+
+
 
 function VSEPRtheory(lonePairs?,...elements:ThreeElement[]){
     //*atoms bonded to central atom
@@ -412,9 +445,7 @@ function VSEPRtheory(lonePairs?,...elements:ThreeElement[]){
         }
 
         else{
-
-            switch (lonePairs) {  
-                         
+            switch (lonePairs) {          
                 case 0:
                     switch (elements.length - 1){
                         case 2: 
@@ -448,20 +479,36 @@ function VSEPRtheory(lonePairs?,...elements:ThreeElement[]){
                         break;
 
                         case 4:
+                            //https://en.wikipedia.org/wiki/Tetrahedral_molecular_geometry#
                             angle = 109.5;
                             angle = degreesToRadians(angle);
 
+                            //*get element[i] to  distance D pythagoras theorem
+                            let distance = Math.sqrt(3);
+                            
+
                             //*move the second element to the right position
-                            elements[1].ball.position.x = Math.cos(angle) * D + elements[0].ball.position.x;
-                            elements[1].ball.position.y = Math.sin(angle) * D + elements[0].ball.position.y;
+                            elements[1].ball.position.x = elements[0].ball.position.x - D / distance;
+                            elements[1].ball.position.y = elements[0].ball.position.y + D / distance;
+                            elements[1].ball.position.z = elements[0].ball.position.z + D / distance;
 
                             //*move the third element to the right position
-                            elements[2].ball.position.x = Math.cos(angle * 2) * D + elements[0].ball.position.x;
-                            elements[2].ball.position.y = Math.sin(angle * 2) * D + elements[0].ball.position.y;
-
+                            elements[2].ball.position.x = elements[0].ball.position.x + D / distance;
+                            elements[2].ball.position.y = elements[0].ball.position.y + D / distance;
+                            elements[2].ball.position.z = elements[0].ball.position.z - D / distance;
+                        
                             //*move the fourth element to the right position
-                            elements[3].ball.position.y = Math.cos(angle) * D + elements[0].ball.position.y;
-                            elements[3].ball.position.z = Math.cos(angle) * D + elements[0].ball.position.z;
+                            elements[3].ball.position.x = elements[0].ball.position.x + D / distance;
+                            elements[3].ball.position.y = elements[0].ball.position.y - D / distance;
+                            elements[3].ball.position.z = elements[0].ball.position.z + D / distance;
+                        
+                            //*move the fifth element to the right position
+                            elements[4].ball.position.x = elements[0].ball.position.x - D / distance;
+                            elements[4].ball.position.y = elements[0].ball.position.y - D / distance;
+                            elements[4].ball.position.z = elements[0].ball.position.z - D / distance;
+                        break;
+
+                        case 5:
 
                     }
                 break;
@@ -546,6 +593,7 @@ bf3.group.position.x = 10;
 ch4.group.position.x = 15;
 
 
+
 //*VSEPR theory
 VSEPRtheory(0, co2.elements[0], co2.elements[1], co2.elements[2]);
 VSEPRtheory(2, h2o.elements[0], h2o.elements[1], h2o.elements[2]);
@@ -553,6 +601,8 @@ VSEPRtheory(0, bf3.elements[0], bf3.elements[1], bf3.elements[2], bf3.elements[3
 VSEPRtheory(0, ch4.elements[0], ch4.elements[1], ch4.elements[2], ch4.elements[3], ch4.elements[4]);
 
 
+// console.log(radiansToDegrees(getAngle(ch4.elements[0], ch4.elements[1], ch4.elements[2])));
+// console.log(radiansToDegrees(getAngle(ch4.elements[0], ch4.elements[2], ch4.elements[3])));
 
 
 //*animation loop
@@ -569,4 +619,11 @@ function animate() {
     //!
 	renderer.render( scene, camera );
 } animate();
+
+
+co2.makeLines();
+console.log(co2.lines[0].geometry.attributes.position.getX(0));
+console.log(co2.lines[0].geometry.attributes.position.getX(1));
+
+
 
