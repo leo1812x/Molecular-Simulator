@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { ThreeElement} from './classes';
+import { THREE_LJ, ThreeElement} from './classes';
 import { boxForHelper } from './setup';
 
 //!CONSTANTS CONSTANTS
@@ -21,7 +21,8 @@ export function getVelocity(element:ThreeElement):number{
     //*Thermal Velocity using  the Maxwell-Boltzmann Distribution
     let atomicMass = AMU_TO_KG(Number(element.element.atomicMass.toString().slice(0, 6)));
     let velocity = Math.sqrt((3 * BOLTZMANN_CONSTANT * temperature) / atomicMass);    
-    return velocity;
+    console.log(velocity);
+    return velocity
 }
 
 
@@ -30,7 +31,7 @@ export function AMU_TO_KG(AMU:number):number{
     return AMU * 1.66053906660e-27;
 }
 
-export function keepInBounds(element:ThreeElement):void{
+export function keepInBounds(element:(ThreeElement | THREE_LJ)):void{
     //*get the element position
     let {x, y, z} = element.ball.position;
 
@@ -44,7 +45,7 @@ export function keepInBounds(element:ThreeElement):void{
 
 }
 
-export function getdistance(thisElement:ThreeElement, otherElement:ThreeElement):number{
+export function getdistance(thisElement:(ThreeElement | THREE_LJ), otherElement:(ThreeElement | THREE_LJ)):number{
     //*get circles coordenates
     let {x, y, z} = thisElement.ball.position;
     let {x: otherX, y: otherY, z: otherZ} = otherElement.ball.position;
@@ -89,7 +90,7 @@ export function generaterandomposition():THREE.Vector3{
     return new THREE.Vector3(x, y, z);   
 }
 
-export function updatePosition(element:ThreeElement):void{
+export function updatePosition(element:(ThreeElement | THREE_LJ)):void{
     let newX = element.ball.position.x += element.velocity*dt;
     let newY = element.ball.position.y += element.velocity*dt;
     let newZ = element.ball.position.z += element.velocity*dt;

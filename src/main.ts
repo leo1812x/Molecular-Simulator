@@ -1,15 +1,15 @@
 import './styles/index.css';
 import './styles/simulator.css';
 
-import { THREECompound, ThreeElement } from './classes';
-import * as THREE from 'three';
+
+import { THREECompound, THREE_LJ, ThreeElement } from './classes';
 import * as setUp from './setup';
 import * as functions from './functions';
 import periodic_table from './periodic_table/periodic_table';
+import * as lammps from  './LAMMPS/lammps_converter';
 
 
-
-//!TESTING:
+//!TESTING: COMPOUNDS
 // //*crate
 // let h2o = new THREECompound(periodic_table.number(6),periodic_table.number(1), periodic_table.symbol('H'));    
 // let co2 = new THREECompound(periodic_table.symbol('C'),periodic_table.number(6), periodic_table.symbol('O'));
@@ -33,13 +33,32 @@ import periodic_table from './periodic_table/periodic_table';
 // functions.VSEPRtheory(0, bf3.elements[0], bf3.elements[1], bf3.elements[2], bf3.elements[3]);
 // functions.VSEPRtheory(0, ch4.elements[0], ch4.elements[1], ch4.elements[2], ch4.elements[3], ch4.elements[4]);
 
+//!TESTING: ATOMS
+// let h = new ThreeElement(periodic_table.symbol('H'));
+// let o = new ThreeElement(periodic_table.symbol('O'));
+// let he = new ThreeElement(periodic_table.symbol('He'));
 
-let h = new ThreeElement(periodic_table.symbol('H'));
-let o = new ThreeElement(periodic_table.symbol('O'));
-let he = new ThreeElement(periodic_table.symbol('He'));
+// o.ball.position.x += 5;
+// he.ball.position.x += 10;
 
-o.ball.position.x += 5;
-he.ball.position.x += 10;
+
+//!TESTING: LJ PARTICLES
+let lj = new THREE_LJ();
+lj.ball.position.x += 12;
+
+
+
+
+
+
+
+// !lammps TEST
+lammps.lammpsRead(lammps.cleanInput(lammps.input));
+
+
+
+
+
 
 
 
@@ -62,6 +81,7 @@ function animate() {
     //!
 	setUp.renderer.render( setUp.scene, setUp.camera );
 } animate();
+
 
 
 

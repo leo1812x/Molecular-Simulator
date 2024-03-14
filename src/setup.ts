@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
-import { ThreeElement, THREECompound } from './classes';
+import { ThreeElement, THREECompound, THREE_LJ } from './classes';
 
 
 //!Set up
 export const SIMULATOR = document.getElementById('simulator');
-export let AllElements: ThreeElement[] = [];
+export let AllElements: (ThreeElement | THREE_LJ)[] = [];
 export let allCompounds: THREECompound[] = [];
 
 //!THREE.JS  set up

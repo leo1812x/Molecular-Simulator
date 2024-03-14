@@ -319,4 +319,132 @@ export class THREECompound extends ThreeObject{
 
 
 
+export class THREE_LJ extends ThreeObject{
+distance    :number;    //sigmas
+time        :number;    //reduced LJ tau
+mass        :number;    //ratio to unitless 1.0
+temperature :number;    //reduced LJ temp
+pressure    :number;    //reduced LJ pressure
+energy      :number;    //Kcal/mole
+velocity    :number;    //Angstroms/femtosecond
+force       :number;    // grams/mole * Angstroms/femtosecond^2
+charge      :number;    //+/- 1.0 is proton/electron
+    
+    constructor(){
+        super();
+        
+        //* set three.js atributes
+        setUp.AllElements.push(this);
+        this.ball = new THREE.Mesh((new THREE.SphereGeometry(0.5)),new THREE.MeshBasicMaterial({color: 0xf00000}))
+        setUp.scene.add(this.ball);
+        this.velocity = 2;
+
+
+
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

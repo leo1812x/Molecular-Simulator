@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "Molecular-Simulator",
+			"path": "."
+		},
+		{
+			"name": "LAMMPS 64-bit 2Aug2023 with Python",
+			"path": "../../../AppData/Local/LAMMPS 64-bit 2Aug2023 with Python"
+		}
+	],
+	"settings": {}
+}
