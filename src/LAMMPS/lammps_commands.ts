@@ -1,8 +1,23 @@
+export let style = 'lj';
+export let dimension = 3;
+export let atom_style = 'atomic';
+
+export let lattice_tyle = 'fcc';
+export let lattice_scale = 1.0;
+
+export let region_id;
+export let region_style;
+
+export let createbox_n;
+export let createbox_regionid;
+
 //* Initialation
 function newton (){
 
 }
-function package (){
+
+//can't use package as a function name
+function packages (){
 
 }
 function processors (){
@@ -11,8 +26,14 @@ function processors (){
 function suffix (){
 
 }
-function units (){
+function units (style: string){
+    let styles = ['lj', 'real', 'metal', 'si', 'cgs', 'electron', 'micro', 'nano'];
 
+    if (!styles.includes(style)){
+        throw new Error('Invalid unit style');
+    } 
+
+    style = style;
 }
 
 
@@ -26,19 +47,48 @@ function boundary (){
 function change_box (){
 
 }
-function create_box (){
+function create_box (n: number, id: string, ...args: any[]){
+    createbox_n;
+    createbox_regionid = id;
 
-}
-function dimension (){
-
-}
-function lattice (){
-
-}
-function region (){
+    //? missing keyword, value...
 
 }
 
+export function dimension1 ( dim: number){
+
+    dimension = 2 || 3 ? dim : dimension;
+}
+
+function lattice (style: string, scale: number, ...args: any[]){
+    lattice_tyle = "none" || "sc" || "bcc" || "fcc" || "hcp" ||
+                "diamond" || "sq" || "sq2" || "hex" || "custom" ?
+                style : lattice_tyle;
+
+    lattice_scale = scale;
+
+    //? missing args or "values"    
+}
+
+function region (id: string, style: string, ...args: any[]){
+    region_id = id;
+    region_style = "delete" || "block"    || "cylinder" || "sphere" ||
+                    "plane" || "surface"  || "prism"    || "cone"   ||
+                    "union" || "intersect"|| "subtract" || "group" ?
+                    style : region_style;
+
+    if ( region_style == 'block'){
+        let xlo = args[0];
+        let xhi = args[1];
+        let ylo = args[2];
+        let yhi = args[3];
+        let zlo = args[4];
+        let zhi = args[5];
+    }
+    
+    //? missing args, keyword, args...
+
+}
 
 
 
@@ -50,7 +100,17 @@ function region (){
 function atom_modify (){
 
 }
-function atom_style (){
+export function atom_styles ( style: string, ...args: any[]){
+    atom_style ="amoeba"||"angle"     ||"atomic"    ||"body"     ||
+                "bond"  ||"charge"    ||"dielectric"||"dipole"   ||
+                "dpd"   ||"edpd"      ||"electron"  ||"ellipsoid"||
+                "full"  ||"line"      ||"mdpd"      ||"molecular"||
+                "oxdna" ||"peri"      ||"smd"       ||"sph"      ||
+                "sphere"||"bpm/sphere"||"spin"      ||"tdpd"     ||
+                "tri"   ||"template"  ||"wavepacket"||"hybrid" ? 
+                style : atom_style;
+
+
 
 }
 function balance (){
@@ -372,7 +432,7 @@ function variable (){
 }
 
 
-
+export { newton, packages, processors, suffix, units, boundary, change_box, create_box,  lattice, region, atom_modify, balance, create_atoms, create_bonds, delete_atoms, delete_bonds, displace_atoms, group, mass, molecule, read_data, read_dump, read_restart, replicate, set, velocity, angle_coeff, angle_style, bond_coeff, bond_style, bond_write, dielectric, dihedral_coeff, dihedral_style, improper_coeff, improper_style, kspace_modify, kspace_style, pair_coeff, pair_modify, pair_style, pair_write, special_bonds, comm_modify, comm_style, info, min_modify, min_style, neigh_modify, neighbor, partition, reset_timestep, run_style, timer, timestep, compute, compute_modify, fix, fix_modify, uncompute, unfix, dump_image, dump_movie, dump, dump_modify, restart, thermo, thermo_modify, thermo_style, undump, write_coeff, write_data, write_dump, write_restartv, minimize, neb, neb_spin, prd, rerun, run, tad, temper, clear, echo, if_, include, info_, jump, label, log, next, print, python, quit, shell, variable };
 
 
 

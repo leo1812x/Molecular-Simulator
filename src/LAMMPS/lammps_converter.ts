@@ -1,4 +1,4 @@
-
+import * as commands from  './lammps_commands';
 
 //* This function will convert the input string from LAMMPS output and 
 //* convert it into a sequence of outputs that can be used by my program
@@ -8,7 +8,6 @@
                     units           lj&
                     dimension       2
                     atom_style      atomic  #test
-                    test \$T
                 # Atom definition
                     
                     lattice         sq  0.1
@@ -61,18 +60,38 @@ export function cleanInput (input: string){
 
         //? WILL NEED TO IMPROVE THIS
         //* rule 3, $ call variables
-        if (inputAsArray[i].includes("$") && !inputAsArray[i].includes(`"$"`)){
-            let match
-            if (inputAsArray[i].includes("${")){
-                match = inputAsArray[i].match(/\$\{(.*?)\}/)[1];
-            }
-            else {
-                match = inputAsArray[i].match(/\$(.)/)[1];
-            }
-            console.log(match);
-            
-        }
+        // if (inputAsArray[i].includes("$") && !inputAsArray[i].includes(`"$"`)){
+        //     let matches = []
+        //     if (inputAsArray[i].includes("${")){                
+        //         matches.push(inputAsArray[i].matchAll(/\$\{(.*?)\}/g));
+        //     }
 
+        //     if (inputAsArray[i].includes('$')) {
+        //         matches.push(inputAsArray[i].matchAll(/\$[^{]/g));
+        //     }
+        //     console.log(matches[0]);
+
+        //     matches.forEach( (match) => {
+        //         inputAsArray[i] = inputAsArray[i].replace(match[0], match[1]);
+        //     })
+            
+        // }
+        if (inputAsArray[i].includes("$") && !inputAsArray[i].includes(`"$"`)){
+            let matches = []
+            if (inputAsArray[i].includes("${")){                
+                matches.push(...Array.from(inputAsArray[i].matchAll(/\$\{(.*?)\}/g)));
+            }
+            
+            if (inputAsArray[i].includes('$')) {                
+                matches.push(...Array.from(inputAsArray[i].matchAll(/\$([^{])/g)));
+            }            console.log(matches);
+        
+            matches.forEach( (match) => {
+                if (match[1]) {
+                    inputAsArray[i] = inputAsArray[i].replace(match[0], match[1]);
+                }
+            })
+        }
         //*trim the line
         inputAsArray[i] = inputAsArray[i].trim();
 
@@ -125,7 +144,7 @@ export function lammpsRead(instructions: string[]) {
                 
                 break;
             case 'units':
-                units = Number.parseInt( splittedInstruction[1]);                
+                commands.units(splittedInstruction[1]);
                 break;
 
 
@@ -140,22 +159,11 @@ export function lammpsRead(instructions: string[]) {
                 
                 break;
             case 'dimension':
-                dimension = Number.parseInt( splittedInstruction[1]);  
+                commands.dimension1(Number.parseInt(splittedInstruction[1]));  
 
                 break;
             case 'lattice':
-                style = "none" || "sc" || "bcc" || "fcc" || "hcp" ||
-                     "diamond" || "sq" || "sq2" || "hex" || "custom" ?
-                     splittedInstruction[1] : style;
-
-                scale = Number.parseInt(splittedInstruction[2]);
-
-                if (splittedInstruction[3]){
-                    keyword = "origin" || "orient" || "spacing" ||
-                              "a1"     || "a2"     || "a3" || "basis" ? 
-                              splittedInstruction[3] :  null;
-                }
-
+                commands.lattice(splittedInstruction[1], Number.parseFloat(splittedInstruction[2]));
                 break;
 
             case 'region':
