@@ -1,8 +1,12 @@
+import * as THREE from 'three';
+import * as setUp from '../setup';
+import {Region, boxForHelper, Lattice}  from './classes';
+
 export let style = 'lj';
 export let dimension = 3;
 export let atom_style = 'atomic';
 
-export let lattice_tyle = 'fcc';
+export let lattice_tyle = 'none';
 export let lattice_scale = 1.0;
 
 export let region_id;
@@ -11,6 +15,9 @@ export let region_style;
 export let createbox_n;
 export let createbox_regionid;
 
+
+export let currentRegion: Region 
+export let currentLattice: Lattice
 //* Initialation
 function newton (){
 
@@ -47,12 +54,8 @@ function boundary (){
 function change_box (){
 
 }
-function create_box (n: number, id: string, ...args: any[]){
-    createbox_n;
-    createbox_regionid = id;
-
-    //? missing keyword, value...
-
+function create_box (n: string, id: string, ...args: any[]){        
+    if (id == currentRegion.getId()) currentRegion.createBox();
 }
 
 export function dimension1 ( dim: number){
@@ -60,6 +63,8 @@ export function dimension1 ( dim: number){
     dimension = 2 || 3 ? dim : dimension;
 }
 
+
+//  lattice         sq  0.1
 function lattice (style: string, scale: number, ...args: any[]){
     lattice_tyle = "none" || "sc" || "bcc" || "fcc" || "hcp" ||
                 "diamond" || "sq" || "sq2" || "hex" || "custom" ?
@@ -67,27 +72,16 @@ function lattice (style: string, scale: number, ...args: any[]){
 
     lattice_scale = scale;
 
+    currentLattice = new Lattice(style, scale, ...args);
+    console.log(currentLattice.getStyle(), currentLattice.getScale());
+    
+
     //? missing args or "values"    
 }
 
-function region (id: string, style: string, ...args: any[]){
-    region_id = id;
-    region_style = "delete" || "block"    || "cylinder" || "sphere" ||
-                    "plane" || "surface"  || "prism"    || "cone"   ||
-                    "union" || "intersect"|| "subtract" || "group" ?
-                    style : region_style;
-
-    if ( region_style == 'block'){
-        let xlo = args[0];
-        let xhi = args[1];
-        let ylo = args[2];
-        let yhi = args[3];
-        let zlo = args[4];
-        let zhi = args[5];
-    }
+function region (id: string, style: string, ...args: string[]){
     
-    //? missing args, keyword, args...
-
+    currentRegion = new Region(id, style, ...args);
 }
 
 
@@ -100,6 +94,7 @@ function region (id: string, style: string, ...args: any[]){
 function atom_modify (){
 
 }
+
 export function atom_styles ( style: string, ...args: any[]){
     atom_style ="amoeba"||"angle"     ||"atomic"    ||"body"     ||
                 "bond"  ||"charge"    ||"dielectric"||"dipole"   ||
@@ -116,7 +111,68 @@ export function atom_styles ( style: string, ...args: any[]){
 function balance (){
 
 }
-function create_atoms (){
+
+//           create_atoms    1   box
+function create_atoms (type: string, style: string,){
+
+    if (boxForHelper != undefined && lattice_tyle != null){
+        console.log(boxForHelper.parameters.height);
+        
+        for (let i = 0; i < boxForHelper.parameters.height/2; i++){            
+            for (let j = 0; j < boxForHelper.parameters.width/2; j++){          
+                for (let k = 0; k < boxForHelper.parameters.depth/2; k++){
+                    
+                    let atom = new THREE.Mesh( new THREE.SphereGeometry( 0.1, 32, 32 ), new THREE.MeshBasicMaterial( {color: 0xffff00} ) );
+                    atom.position.x = i;
+                    atom.position.y = j;
+                    atom.position.z = k;
+                    setUp.scene.add( atom );
+                  
+                    atom = new THREE.Mesh( new THREE.SphereGeometry( 0.1, 32, 32 ), new THREE.MeshBasicMaterial( {color: 0xffff00} ) );
+                    atom.position.x = -i;
+                    atom.position.y = j;
+                    atom.position.z = k;
+                    setUp.scene.add( atom );
+
+                    atom = new THREE.Mesh( new THREE.SphereGeometry( 0.1, 32, 32 ), new THREE.MeshBasicMaterial( {color: 0xffff00} ) );
+                    atom.position.x = i;
+                    atom.position.y = -j;
+                    atom.position.z = k;
+                    setUp.scene.add( atom );
+
+                    atom = new THREE.Mesh( new THREE.SphereGeometry( 0.1, 32, 32 ), new THREE.MeshBasicMaterial( {color: 0xffff00} ) );
+                    atom.position.x = i;
+                    atom.position.y = j;
+                    atom.position.z = -k;
+                    setUp.scene.add( atom );
+
+                    atom = new THREE.Mesh( new THREE.SphereGeometry( 0.1, 32, 32 ), new THREE.MeshBasicMaterial( {color: 0xffff00} ) );
+                    atom.position.x = -i;
+                    atom.position.y = -j;
+                    atom.position.z = k;
+                    setUp.scene.add( atom );
+
+                    atom = new THREE.Mesh( new THREE.SphereGeometry( 0.1, 32, 32 ), new THREE.MeshBasicMaterial( {color: 0xffff00} ) );
+                    atom.position.x = -i;
+                    atom.position.y = j;
+                    atom.position.z = -k;
+                    setUp.scene.add( atom );
+
+                    atom = new THREE.Mesh( new THREE.SphereGeometry( 0.1, 32, 32 ), new THREE.MeshBasicMaterial( {color: 0xffff00} ) );
+                    atom.position.x = i;
+                    atom.position.y = -j;
+                    atom.position.z = -k;
+                    setUp.scene.add( atom );
+
+                    atom = new THREE.Mesh( new THREE.SphereGeometry( 0.1, 32, 32 ), new THREE.MeshBasicMaterial( {color: 0xffff00} ) );
+                    atom.position.x = -i;
+                    atom.position.y = -j;
+                    atom.position.z = -k;
+                    setUp.scene.add( atom );
+                }
+            }
+        }
+    }
 
 }
 function create_bonds (){
@@ -433,8 +489,6 @@ function variable (){
 
 
 export { newton, packages, processors, suffix, units, boundary, change_box, create_box,  lattice, region, atom_modify, balance, create_atoms, create_bonds, delete_atoms, delete_bonds, displace_atoms, group, mass, molecule, read_data, read_dump, read_restart, replicate, set, velocity, angle_coeff, angle_style, bond_coeff, bond_style, bond_write, dielectric, dihedral_coeff, dihedral_style, improper_coeff, improper_style, kspace_modify, kspace_style, pair_coeff, pair_modify, pair_style, pair_write, special_bonds, comm_modify, comm_style, info, min_modify, min_style, neigh_modify, neighbor, partition, reset_timestep, run_style, timer, timestep, compute, compute_modify, fix, fix_modify, uncompute, unfix, dump_image, dump_movie, dump, dump_modify, restart, thermo, thermo_modify, thermo_style, undump, write_coeff, write_data, write_dump, write_restartv, minimize, neb, neb_spin, prd, rerun, run, tad, temper, clear, echo, if_, include, info_, jump, label, log, next, print, python, quit, shell, variable };
-
-
 
 
 

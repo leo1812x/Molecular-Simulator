@@ -11,7 +11,7 @@ import * as commands from  './lammps_commands';
                 # Atom definition
                     
                     lattice         sq  0.1
-                    region          simbox  block   0   20  0   20  -0.1 0.1
+                    region  simbox   block 0 10 0 10 0 10
                     create_box      1   simbox      
                     create_atoms    1   box
                     
@@ -58,24 +58,6 @@ export function cleanInput (input: string){
             inputAsArray[i] = inputAsArray[i].replace(/#.*/,"");
         }
 
-        //? WILL NEED TO IMPROVE THIS
-        //* rule 3, $ call variables
-        // if (inputAsArray[i].includes("$") && !inputAsArray[i].includes(`"$"`)){
-        //     let matches = []
-        //     if (inputAsArray[i].includes("${")){                
-        //         matches.push(inputAsArray[i].matchAll(/\$\{(.*?)\}/g));
-        //     }
-
-        //     if (inputAsArray[i].includes('$')) {
-        //         matches.push(inputAsArray[i].matchAll(/\$[^{]/g));
-        //     }
-        //     console.log(matches[0]);
-
-        //     matches.forEach( (match) => {
-        //         inputAsArray[i] = inputAsArray[i].replace(match[0], match[1]);
-        //     })
-            
-        // }
         if (inputAsArray[i].includes("$") && !inputAsArray[i].includes(`"$"`)){
             let matches = []
             if (inputAsArray[i].includes("${")){                
@@ -156,6 +138,7 @@ export function lammpsRead(instructions: string[]) {
                 break;
         
             case 'create_box':
+                commands.create_box(splittedInstruction[1], splittedInstruction[2], ...splittedInstruction.slice(3));
                 
                 break;
             case 'dimension':
@@ -167,15 +150,8 @@ export function lammpsRead(instructions: string[]) {
                 break;
 
             case 'region':
-                ID = splittedInstruction[1];
-
-                regionStyle = "delete"    || "block" || "cone" || "cylinder" ||
-                              "ellipsoid" || "plane" || "prism" || "sphere" ||
-                              "union"     || "intersect" ?
-                              splittedInstruction[2] : null;
-
-                              
-
+                commands.region(splittedInstruction[1], splittedInstruction[2], ...splittedInstruction.slice(3));
+                
                 break;
     
             //*setup atoms
@@ -198,6 +174,7 @@ export function lammpsRead(instructions: string[]) {
                 
                 break;
             case 'create_atoms':
+                commands.create_atoms(splittedInstruction[1], splittedInstruction[2]);
 
                 break;
             case 'create_bonds':

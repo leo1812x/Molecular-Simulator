@@ -16,9 +16,6 @@ export const renderer = new THREE.WebGLRenderer();
 //*helpers
 const gridHelper = new THREE.GridHelper(25, 10);
 const controls = new OrbitControls(camera, renderer.domElement);
-export const boxForHelper = new THREE.BoxGeometry( 75, 125, 125 );
-const object = new THREE.Mesh( boxForHelper, new THREE.MeshBasicMaterial() );
-const BoxHelper = new THREE.BoxHelper( object, 0xffff00 );
 
 //*set the renderer on the DOM
 renderer.setSize( SIMULATOR.getBoundingClientRect().width, SIMULATOR.getBoundingClientRect().height );
@@ -26,6 +23,6 @@ renderer.setPixelRatio(window.devicePixelRatio)
 SIMULATOR.appendChild(renderer.domElement)
 camera.position.z = 50;
 
-scene.add( gridHelper, BoxHelper );
+scene.add( gridHelper ); //boxhelper was here too
 
 

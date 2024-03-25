@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { THREE_LJ, ThreeElement} from './classes';
-import { boxForHelper } from './setup';
+import { boxForHelper } from './LAMMPS/classes';
 
 //!CONSTANTS CONSTANTS
 //*Boltzmann constant
