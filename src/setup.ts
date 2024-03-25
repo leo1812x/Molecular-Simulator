@@ -1,17 +1,19 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import { ThreeElement, THREECompound, THREE_LJ } from './classes';
+import { LennardJonesUnits } from './LAMMPS/classes';
 
 
 //!Set up
 export const SIMULATOR = document.getElementById('simulator');
-export let AllElements: (ThreeElement | THREE_LJ)[] = [];
+export let AllElements: (ThreeElement | THREE_LJ | LennardJonesUnits)[] = [];
 export let allCompounds: THREECompound[] = [];
 
 //!THREE.JS  set up
 export const scene = new THREE.Scene();
-export const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+export const camera = new THREE.PerspectiveCamera( 25, window.innerWidth / window.innerHeight, 0.1, 1000 );
 export const renderer = new THREE.WebGLRenderer();
+
 
 //*helpers
 const gridHelper = new THREE.GridHelper(25, 10);

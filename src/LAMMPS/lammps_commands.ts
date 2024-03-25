@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import * as setUp from '../setup';
 import {Region, boxForHelper, Lattice}  from './classes';
+import { getdistance } from '../functions';
 
 export let style = 'lj';
 export let dimension = 3;
@@ -263,12 +264,30 @@ function pair_coeff (){
 function pair_modify (){
 
 }
-function pair_style (){
+
+//pair_style  lj/cut 2.5
+function pair_style (style: string, ...args: string[]){
+    
+    style = "lj/cut 2.5" || "eam/alloy" ||
+        "hybrid lj/charmm/coul/long 10.0 eam" ||
+         "table linear 1000" || "none" ? style : "none";
+
+    if (style == "lj/cut 2.5"){
+
+        for (let i = 0; i < 100; i++){
+        let e = 1.0;
+        let o = 1.0;
+        let r = getdistance();
+
+        //*standard 12/6 Lennard-Jones potential
+        let E = 4*e*(((o/r)^12) - ((o/r)^6));
+    }
 
 }
 function pair_write (){
 
 }
+
 function special_bonds (){
 
 }

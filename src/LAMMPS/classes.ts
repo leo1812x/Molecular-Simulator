@@ -4,7 +4,7 @@ import * as setUp from '../setup';
 export let boxForHelper: THREE.BoxGeometry;
 
 
-class LennardJonesUnits {
+export class LennardJonesUnits {
     // Characteristic constants of the system
     private mass: number; // The mass m*
     private distance: number; // The characteristic distance σ
@@ -15,6 +15,8 @@ class LennardJonesUnits {
         this.mass = mass;
         this.distance = distance;
         this.energy = energy;
+
+        setUp.AllElements.push(this);
     }
 
     // Method to calculate the reduced time τ* based on mass, distance, and energy
