@@ -11,7 +11,7 @@ import * as commands from  './lammps_commands';
                 # Atom definition
                     
                     lattice         sq  0.1
-                    region  simbox   block 0 10 0 10 0 10
+                    region  simbox   block 0 5 0 5 0 5
                     create_box      1   simbox      
                     create_atoms    1   box
                     
@@ -82,7 +82,6 @@ export function cleanInput (input: string){
     //* delete empty lines
     inputAsArray = inputAsArray.filter(string => string !== '')
 
-    console.log(inputAsArray);
     return inputAsArray;
 
 }
@@ -181,12 +180,99 @@ export function lammpsRead(instructions: string[]) {
 
                 break;
 
-            case 'delete_bonds':
+            case 'delete_atoms':
+                break;
 
+            case 'delete_bonds':
+                break;
+
+            case 'displace_atoms':
+                break;
+
+            case 'group':
+                break;
+
+            case 'mass':
+                commands.mass(splittedInstruction[1], Number.parseFloat(splittedInstruction[2]));
+                break;
+
+            case 'molecule':
+                break;
+            
+            case 'read_data':
+                break;
+
+            case 'read_dump':
+                break;
+
+            case 'read_restart':
+                break;
+
+            case 'replicate':
+                break;
+
+            case 'set':
+                break;
+
+            case 'velocity':
+                break;
+
+            
+    
+        //*force fiels
+
+            case 'angle_coeff':
+                break;
+
+            case 'angle_style':
+                break;
+
+            case 'bond_coeff':
+                break;
+
+            case 'bond_style':
+                break;
+
+            case 'band_write':
+                break;
+
+            case 'dialectic':
+                break;
+
+            case 'dihedral_coeff':
+                break;
+
+            case 'diheral_style':
+                break;
+
+            case 'improper_coeff':
+                break;
+
+            case 'impproper_style':
+                break;
+
+            case 'kspace_style':
+                break;
+
+            case 'pair_coeff':
+                // commands.pair_style(splittedInstruction[1], ...splittedInstruction.slice(2));
+                commands.pair_coeff(splittedInstruction[1], splittedInstruction[2], splittedInstruction[3], splittedInstruction[4]);
+                break;
+
+            case 'pair_modify':
+                break;
+
+            case 'pair_style':
+                commands.pair_style(splittedInstruction[1], ...splittedInstruction.slice(2));
+                break;
+
+            case 'pair_write':
+                break;
+
+            case 'special_bonds':
                 break;
 
         }
-        
         
         
 

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { THREE_LJ, ThreeElement} from './classes';
 import { boxForHelper } from './LAMMPS/classes';
+// import { LennardJonesUnits } from './LAMMPS/classes';
 
 //!CONSTANTS CONSTANTS
 //*Boltzmann constant
@@ -57,6 +58,7 @@ export function getdistance(thisElement:(ThreeElement | THREE_LJ), otherElement:
 
     //* distance formula (3d pythagoras theorem)
     let distance = Math.sqrt(Math.pow(differenceOnXs, 2) + Math.pow(differenceOnYs, 2) + Math.pow(differenceOnZs, 2));
+    
     return distance;
 }
 

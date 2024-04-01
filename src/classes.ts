@@ -6,10 +6,16 @@ export class ThreeObject {
     static idCounter:number = 0;
     id:number
     ball:THREE.Mesh
+    mass:number;
 
     constructor(){
         ThreeObject.idCounter++;  
         this.id = ThreeObject.idCounter;
+
+        //*add the element type to the list
+        if (!setUp.AllElementTypes.includes(this.constructor.name)){
+            setUp.AllElementTypes.push(this.constructor.name);
+        }
 
     }
 
@@ -329,16 +335,17 @@ energy      :number;    //Kcal/mole
 velocity    :number;    //Angstroms/femtosecond
 force       :number;    // grams/mole * Angstroms/femtosecond^2
 charge      :number;    //+/- 1.0 is proton/electron
+
+ball       :THREE.Mesh;
     
     constructor(){
         super();
         
         //* set three.js atributes
         setUp.AllElements.push(this);
-        this.ball = new THREE.Mesh((new THREE.SphereGeometry(0.5)),new THREE.MeshBasicMaterial({color: 0xf00000}))
+        this.ball = new THREE.Mesh((new THREE.SphereGeometry(0.1, 32, 32)),new THREE.MeshBasicMaterial({color: 0xffff00}))
         setUp.scene.add(this.ball);
         this.velocity = 2;
-
 
 
     }

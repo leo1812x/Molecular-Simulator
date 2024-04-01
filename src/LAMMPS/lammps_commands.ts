@@ -1,9 +1,11 @@
 import * as THREE from 'three';
 import * as setUp from '../setup';
-import {Region, boxForHelper, Lattice}  from './classes';
-import { getdistance } from '../functions';
+import * as classes from '../classes';
 
-export let style = 'lj';
+import {Region, boxForHelper, Lattice}  from './classes';
+import * as functions from '../functions';
+
+export let STYLE = 'lj';
 export let dimension = 3;
 export let atom_style = 'atomic';
 
@@ -19,6 +21,11 @@ export let createbox_regionid;
 
 export let currentRegion: Region 
 export let currentLattice: Lattice
+
+export let pairStyle_func = '4*e*(((o/r)^12) - ((o/r)^6))'
+export let pairStyle_cutoff = 2.5;
+export let pair_style_style;
+
 //* Initialation
 function newton (){
 
@@ -74,7 +81,6 @@ function lattice (style: string, scale: number, ...args: any[]){
     lattice_scale = scale;
 
     currentLattice = new Lattice(style, scale, ...args);
-    console.log(currentLattice.getStyle(), currentLattice.getScale());
     
 
     //? missing args or "values"    
@@ -117,63 +123,51 @@ function balance (){
 function create_atoms (type: string, style: string,){
 
     if (boxForHelper != undefined && lattice_tyle != null){
-        console.log(boxForHelper.parameters.height);
         
-        for (let i = 0; i < boxForHelper.parameters.height/2; i++){            
-            for (let j = 0; j < boxForHelper.parameters.width/2; j++){          
-                for (let k = 0; k < boxForHelper.parameters.depth/2; k++){
-                    
-                    let atom = new THREE.Mesh( new THREE.SphereGeometry( 0.1, 32, 32 ), new THREE.MeshBasicMaterial( {color: 0xffff00} ) );
-                    atom.position.x = i;
-                    atom.position.y = j;
-                    atom.position.z = k;
-                    setUp.scene.add( atom );
-                  
-                    atom = new THREE.Mesh( new THREE.SphereGeometry( 0.1, 32, 32 ), new THREE.MeshBasicMaterial( {color: 0xffff00} ) );
-                    atom.position.x = -i;
-                    atom.position.y = j;
-                    atom.position.z = k;
-                    setUp.scene.add( atom );
+    // Pre-calculate half of the dimensions to avoid doing it in every iteration
+    const halfHeight = boxForHelper.parameters.height / 2;
+    const halfWidth = boxForHelper.parameters.width / 2;
+    const halfDepth = boxForHelper.parameters.depth / 2;
 
-                    atom = new THREE.Mesh( new THREE.SphereGeometry( 0.1, 32, 32 ), new THREE.MeshBasicMaterial( {color: 0xffff00} ) );
-                    atom.position.x = i;
-                    atom.position.y = -j;
-                    atom.position.z = k;
-                    setUp.scene.add( atom );
+    //* Iterate over half of each dimension.
+    // First, add the atom at the origin if needed
+    if (halfHeight > 0 && halfWidth > 0 && halfDepth > 0) {
+        const originAtom = new classes.THREE_LJ();
+        originAtom.ball.position.set(0, 0, 0);
+        setUp.scene.add(originAtom.ball);
+    }
 
-                    atom = new THREE.Mesh( new THREE.SphereGeometry( 0.1, 32, 32 ), new THREE.MeshBasicMaterial( {color: 0xffff00} ) );
-                    atom.position.x = i;
-                    atom.position.y = j;
-                    atom.position.z = -k;
-                    setUp.scene.add( atom );
+// Then iterate over each dimension starting from 1 to avoid duplicate positions at the origin
+    for (let i = 0; i < halfHeight; i++) {
+        for (let j = 0; j < halfWidth; j++) {
+            for (let k = 0; k < halfDepth; k++) {
+                // Skip the origin which was already added
+                if (i === 0 && j === 0 && k === 0) continue;
 
-                    atom = new THREE.Mesh( new THREE.SphereGeometry( 0.1, 32, 32 ), new THREE.MeshBasicMaterial( {color: 0xffff00} ) );
-                    atom.position.x = -i;
-                    atom.position.y = -j;
-                    atom.position.z = k;
-                    setUp.scene.add( atom );
+                const positions = [];
 
-                    atom = new THREE.Mesh( new THREE.SphereGeometry( 0.1, 32, 32 ), new THREE.MeshBasicMaterial( {color: 0xffff00} ) );
-                    atom.position.x = -i;
-                    atom.position.y = j;
-                    atom.position.z = -k;
-                    setUp.scene.add( atom );
+                // Always add the positive position
+                positions.push({ x: i, y: j, z: k });
 
-                    atom = new THREE.Mesh( new THREE.SphereGeometry( 0.1, 32, 32 ), new THREE.MeshBasicMaterial( {color: 0xffff00} ) );
-                    atom.position.x = i;
-                    atom.position.y = -j;
-                    atom.position.z = -k;
-                    setUp.scene.add( atom );
+                // Add negative positions only if indices are not 0 to avoid duplicates
+                if (i > 0) positions.push({ x: -i, y: j, z: k });
+                if (j > 0) positions.push({ x: i, y: -j, z: k });
+                if (k > 0) positions.push({ x: i, y: j, z: -k });
+                if (i > 0 && j > 0) positions.push({ x: -i, y: -j, z: k });
+                if (i > 0 && k > 0) positions.push({ x: -i, y: j, z: -k });
+                if (j > 0 && k > 0) positions.push({ x: i, y: -j, z: -k });
+                if (i > 0 && j > 0 && k > 0) positions.push({ x: -i, y: -j, z: -k });
 
-                    atom = new THREE.Mesh( new THREE.SphereGeometry( 0.1, 32, 32 ), new THREE.MeshBasicMaterial( {color: 0xffff00} ) );
-                    atom.position.x = -i;
-                    atom.position.y = -j;
-                    atom.position.z = -k;
-                    setUp.scene.add( atom );
-                }
+                // Create and add atoms for all calculated positions
+                positions.forEach(pos => {
+                    const atom = new classes.THREE_LJ();
+                    atom.ball.position.set(pos.x, pos.y, pos.z);
+                    setUp.scene.add(atom.ball);
+                });
             }
         }
     }
+}
 
 }
 function create_bonds (){
@@ -191,8 +185,15 @@ function displace_atoms (){
 function group (){
 
 }
-function mass (){
+function mass (I: string, value: number){
 
+    for (let i = 0; i < setUp.AllElements.length; i++){
+        let element = setUp.AllElements[i];
+
+        if (element.constructor.name == setUp.AllElementTypes[I] || I == '*'){
+            element.mass = value;            
+        }
+    }
 }
 function molecule (){
 
@@ -258,32 +259,63 @@ function kspace_modify (){
 function kspace_style (){
 
 }
-function pair_coeff (){
 
+function pair_coeff (I: string, J: string, ...args: string[]){
+    //* i need to grab the atom types who's the potential will be computed
+    //* i also need to grab the atom's who's proximity is less than the cutoff
+    //* i also need to grab the right potential function
+    //* then i need to finally calculate the potential of each atom pair
+
+    for (let i = 0; i < setUp.AllElements.length; i++){
+        let atomA = setUp.AllElements[i];
+        for (let j = 0; j < setUp.AllElements.length; j++){
+            let atomB = setUp.AllElements[j];
+
+            //* skip if atomA and atomB are the same
+            if (atomA == atomB) continue;
+
+            //* if atom is I or *
+            if (atomA.constructor.name == setUp.AllElementTypes[I] ||I == '*'){
+                
+                //* if atom is J or *
+                if (atomB.constructor.name == setUp.AllElementTypes[J] || J == '*'){
+                    
+
+                    let distance = functions.getdistance(atomA, atomB);
+                    if (distance < pairStyle_cutoff){
+
+                        let e = parseFloat(args[0]); //epsilon
+                        let o = parseFloat(args[1]); //sigma
+                        let r = distance;
+                    
+                        if (pair_style_style == "lj/cut"){
+                            const func = 4*e*(((o/r)^12) - ((o/r)^6));
+                            
+
+                        }
+                    }
+                }
+            }
+        }
+
+    }
 }
+
 function pair_modify (){
 
 }
 
 //pair_style  lj/cut 2.5
-function pair_style (style: string, ...args: string[]){
+function pair_style (style: string, ...args: string[]): void{
     
-    style = "lj/cut 2.5" || "eam/alloy" ||
+    pair_style_style = "lj/cut" || "eam/alloy" ||
         "hybrid lj/charmm/coul/long 10.0 eam" ||
          "table linear 1000" || "none" ? style : "none";
 
-    if (style == "lj/cut 2.5"){
-
-        for (let i = 0; i < 100; i++){
-        let e = 1.0;
-        let o = 1.0;
-        let r = getdistance();
-
-        //*standard 12/6 Lennard-Jones potential
-        let E = 4*e*(((o/r)^12) - ((o/r)^6));
-    }
-
+    pairStyle_cutoff = Number.parseFloat(args[0]) || 2.5;
+        
 }
+
 function pair_write (){
 
 }
@@ -508,7 +540,6 @@ function variable (){
 
 
 export { newton, packages, processors, suffix, units, boundary, change_box, create_box,  lattice, region, atom_modify, balance, create_atoms, create_bonds, delete_atoms, delete_bonds, displace_atoms, group, mass, molecule, read_data, read_dump, read_restart, replicate, set, velocity, angle_coeff, angle_style, bond_coeff, bond_style, bond_write, dielectric, dihedral_coeff, dihedral_style, improper_coeff, improper_style, kspace_modify, kspace_style, pair_coeff, pair_modify, pair_style, pair_write, special_bonds, comm_modify, comm_style, info, min_modify, min_style, neigh_modify, neighbor, partition, reset_timestep, run_style, timer, timestep, compute, compute_modify, fix, fix_modify, uncompute, unfix, dump_image, dump_movie, dump, dump_modify, restart, thermo, thermo_modify, thermo_style, undump, write_coeff, write_data, write_dump, write_restartv, minimize, neb, neb_spin, prd, rerun, run, tad, temper, clear, echo, if_, include, info_, jump, label, log, next, print, python, quit, shell, variable };
-
 
 
 
