@@ -58,6 +58,7 @@ export function cleanInput (input: string){
             inputAsArray[i] = inputAsArray[i].replace(/#.*/,"");
         }
 
+        //* rule 3, delete $ and use variables
         if (inputAsArray[i].includes("$") && !inputAsArray[i].includes(`"$"`)){
             let matches = []
             if (inputAsArray[i].includes("${")){                
@@ -87,27 +88,11 @@ export function cleanInput (input: string){
 }
 
 
-
-
-
-
-
-
-
-
-
 export function lammpsRead(instructions: string[]) {
     //*for each line, get the first instruction
     instructions.forEach(instruction => {
         let splittedInstruction = instruction.split(" ");
         let command = splittedInstruction[0];
-
-        let units : number, keyword: string, ID: string;
-        let dimension = 2;
-        let atom_style = 'atomic';
-        let style = 'none';
-        let scale = 1.0;
-        let regionStyle;
 
         switch (command) {
             //!BY CATEGORY
@@ -138,19 +123,18 @@ export function lammpsRead(instructions: string[]) {
         
             case 'create_box':
                 commands.create_box(splittedInstruction[1], splittedInstruction[2], ...splittedInstruction.slice(3));
-                
                 break;
+
             case 'dimension':
                 commands.dimension1(Number.parseInt(splittedInstruction[1]));  
-
                 break;
+
             case 'lattice':
                 commands.lattice(splittedInstruction[1], Number.parseFloat(splittedInstruction[2]));
                 break;
 
             case 'region':
                 commands.region(splittedInstruction[1], splittedInstruction[2], ...splittedInstruction.slice(3));
-                
                 break;
     
             //*setup atoms
@@ -158,20 +142,12 @@ export function lammpsRead(instructions: string[]) {
                 break;
 
             case 'atom_style':
-                atom_style = splittedInstruction[1] == 
-                "amoeba"||"angle"     ||"atomic"    ||"body"     ||
-                "bond"  ||"charge"    ||"dielectric"||"dipole"   ||
-                "dpd"   ||"edpd"      ||"electron"  ||"ellipsoid"||
-                "full"  ||"line"      ||"mdpd"      ||"molecular"||
-                "oxdna" ||"peri"      ||"smd"       ||"sph"      ||
-                "sphere"||"bpm/sphere"||"spin"      ||"tdpd"     ||
-                "tri"   ||"template"  ||"wavepacket"||"hybrid" ? 
-                splittedInstruction[1] : atom_style;
+                commands.atom_styles(splittedInstruction[1]);
                 break;
         
             case 'balance':
-                
                 break;
+
             case 'create_atoms':
                 commands.create_atoms(splittedInstruction[1], splittedInstruction[2]);
 

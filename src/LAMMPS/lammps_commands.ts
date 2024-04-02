@@ -5,27 +5,25 @@ import * as classes from '../classes';
 import {Region, boxForHelper, Lattice}  from './classes';
 import * as functions from '../functions';
 
+
+//* Initialization of variables
+//? i should organize this
 export let STYLE = 'lj';
 export let dimension = 3;
 export let atom_style = 'atomic';
-
 export let lattice_tyle = 'none';
 export let lattice_scale = 1.0;
-
 export let region_id;
 export let region_style;
-
 export let createbox_n;
 export let createbox_regionid;
-
-
 export let currentRegion: Region 
 export let currentLattice: Lattice
-
 export let pairStyle_func = '4*e*(((o/r)^12) - ((o/r)^6))'
 export let pairStyle_cutoff = 2.5;
 export let pair_style_style;
 
+//? i should organize this too
 //* Initialation
 function newton (){
 
@@ -41,17 +39,21 @@ function processors (){
 function suffix (){
 
 }
+
+//* define the type of units to be used
 function units (style: string){
     let styles = ['lj', 'real', 'metal', 'si', 'cgs', 'electron', 'micro', 'nano'];
 
+    //* check for invalid unit style
     if (!styles.includes(style)){
         throw new Error('Invalid unit style');
     } 
 
+    //? something is wrong here
     style = style;
 
+    //* set the unit variables style to lj variables 
     if (style == 'lj'){
-    
         for (let i = 0; i < setUp.AllElements.length; i++){
             let element = setUp.AllElements[i];
             element.mass = 1.0;
@@ -71,10 +73,13 @@ function boundary (){
 function change_box (){
 
 }
+
+//*if the region id is correct, create a THREE box
 function create_box (n: string, id: string, ...args: any[]){        
     if (id == currentRegion.getId()) currentRegion.createBox();
 }
 
+//? this is not doing anything right now
 export function dimension1 ( dim: number){
 
     dimension = 2 || 3 ? dim : dimension;
@@ -89,6 +94,7 @@ function lattice (style: string, scale: number, ...args: any[]){
 
     lattice_scale = scale;
 
+    //? this is not doing anything right now
     currentLattice = new Lattice(style, scale, ...args);
     
 
@@ -111,6 +117,7 @@ function atom_modify (){
 
 }
 
+//? not doing anything right now
 export function atom_styles ( style: string, ...args: any[]){
     atom_style ="amoeba"||"angle"     ||"atomic"    ||"body"     ||
                 "bond"  ||"charge"    ||"dielectric"||"dipole"   ||
@@ -131,8 +138,10 @@ function balance (){
 //           create_atoms    1   box
 function create_atoms (type: string, style: string,){
 
+    //*check for exceptions
     if (boxForHelper != undefined && lattice_tyle != null){
         
+    //?everything below should be done by lattice command    
     // Pre-calculate half of the dimensions to avoid doing it in every iteration
     const halfHeight = boxForHelper.parameters.height / 2;
     const halfWidth = boxForHelper.parameters.width / 2;
@@ -194,6 +203,8 @@ function displace_atoms (){
 function group (){
 
 }
+
+//* Set the mass of the atoms by type
 function mass (I: string, value: number){
 
     for (let i = 0; i < setUp.AllElements.length; i++){
@@ -224,7 +235,7 @@ function set (){
 }
 
 
-
+//? this is not doing anything right now
 function velocity (group:string, style:string, ...args: string[]){
     if (group == 'all'){
         if (style == 'create'){
@@ -284,6 +295,7 @@ function kspace_style (){
 
 }
 
+//* working on this yk
 function pair_coeff (I: string, J: string, ...args: string[]){
     //* i need to grab the atom types who's the potential will be computed
     //* i also need to grab the atom's who's proximity is less than the cutoff
@@ -330,6 +342,7 @@ function pair_modify (){
 }
 
 //pair_style  lj/cut 2.5
+//* set the cutoff distance for the interactions
 function pair_style (style: string, ...args: string[]): void{
     
     pair_style_style = "lj/cut" || "eam/alloy" ||
@@ -407,6 +420,7 @@ function compute_modify (){
 }
 
 //fix             1   all nve
+//*working on this yk
 function fix (ID: number, groupID: string, style: string){
 
 
@@ -498,6 +512,7 @@ function rerun (){
 }
 
 //run             1000
+//*working on this yk
 function run (N:number, keyword: string, ...args: String[]){
 
 
