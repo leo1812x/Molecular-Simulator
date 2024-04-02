@@ -2,7 +2,7 @@ import './styles/index.css';
 import './styles/simulator.css';
 
 
-import { THREECompound, THREE_LJ, ThreeElement } from './classes';
+import { THREE_LJ, ThreeElement } from './classes';
 import * as setUp from './setup';
 import * as functions from './functions';
 import periodic_table from './periodic_table/periodic_table';

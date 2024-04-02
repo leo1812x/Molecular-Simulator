@@ -3,6 +3,14 @@ import * as setUp from '../setup';
 
 export let boxForHelper: THREE.BoxGeometry;
 
+
+//*classes for the LAMMPS commands
+
+
+
+
+//*This class is a wraper for the THREE box that will be used to represent the region
+//*this is created on the LAMMPS region command
 export class Region {
     private id: string;
     private style: string;
@@ -11,6 +19,7 @@ export class Region {
     private z: number;
 
 
+    //*this deals with the input logic for the style parameter
     constructor(id: string, style: string, ...args: string[]) {
         this.id = id;
         this.style = "delete" || "block"    || "cylinder" || "sphere" ||
@@ -29,10 +38,11 @@ export class Region {
         }
     
     }
-
+    //*getters
     public getId(): string {return this.id;}
     public getStyle(): string {return this.style;}
 
+    //*create the THREE box 
     public createBox(){
         if ( this.getStyle() == 'block'){
 
@@ -52,7 +62,8 @@ export class Region {
 
 }
 
-
+//*This class is for the lattice which is the arrangement of the atoms in the simulation
+//? THIS IS CURRENTLY NOT USED (not implemented as it should be)
 export class Lattice {
     private style: string;
     private scale = 1.0;

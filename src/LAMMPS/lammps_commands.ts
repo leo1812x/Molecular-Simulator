@@ -49,8 +49,17 @@ function units (style: string){
     } 
 
     style = style;
-}
 
+    if (style == 'lj'){
+    
+        for (let i = 0; i < setUp.AllElements.length; i++){
+            let element = setUp.AllElements[i];
+            element.mass = 1.0;
+            element.distance = 1.0;
+            element.Boltzmann = 1.0;
+        }
+    } 
+}
 
 
 
@@ -129,8 +138,7 @@ function create_atoms (type: string, style: string,){
     const halfWidth = boxForHelper.parameters.width / 2;
     const halfDepth = boxForHelper.parameters.depth / 2;
 
-    //* Iterate over half of each dimension.
-    // First, add the atom at the origin if needed
+    //* takes care of box (0,0,0) exception
     if (halfHeight > 0 && halfWidth > 0 && halfDepth > 0) {
         const originAtom = new classes.THREE_LJ();
         originAtom.ball.position.set(0, 0, 0);
@@ -144,6 +152,7 @@ function create_atoms (type: string, style: string,){
                 // Skip the origin which was already added
                 if (i === 0 && j === 0 && k === 0) continue;
 
+                //? I think the Lattice should influence the position of the atoms
                 const positions = [];
 
                 // Always add the positive position
@@ -213,9 +222,24 @@ function replicate (){
 function set (){
 
 }
-function velocity (){
 
+
+
+function velocity (group:string, style:string, ...args: string[]){
+    if (group == 'all'){
+        if (style == 'create'){
+
+            for (let i = 0; i < setUp.AllElements.length; i++){
+                let element = setUp.AllElements[i];
+                let temp = parseFloat(args[0]);
+                let randomSeed = parseFloat(args[1]);
+
+            }
+
+        }
+    }
 }
+
 
 
 
@@ -381,7 +405,10 @@ function compute (){
 function compute_modify (){
 
 }
-function fix (){
+
+//fix             1   all nve
+function fix (ID: number, groupID: string, style: string){
+
 
 }
 function fix_modify (){
@@ -469,7 +496,11 @@ function prd (){
 function rerun (){
 
 }
-function run (){
+
+//run             1000
+function run (N:number, keyword: string, ...args: String[]){
+
+
 
 }
 function tad (){

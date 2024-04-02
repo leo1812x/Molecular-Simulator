@@ -6,7 +6,18 @@ export class ThreeObject {
     static idCounter:number = 0;
     id:number
     ball:THREE.Mesh
-    mass:number;
+
+    //? THESE ARE ONLY FOR LJ PARTICLES AS OF RIGHT NOW
+    distance    :number;    //sigmas
+    time        :number;    //reduced LJ tau
+    mass        :number;    //ratio to unitless 1.0
+    temperature :number;    //reduced LJ temp
+    pressure    :number;    //reduced LJ pressure
+    energy      :number;    //Kcal/mole
+    velocity    :number;    //Angstroms/femtosecond
+    force       :number;    // grams/mole * Angstroms/femtosecond^2
+    charge      :number;    //+/- 1.0 is proton/electron
+    Boltzmann   :number;    
 
     constructor(){
         ThreeObject.idCounter++;  
@@ -16,39 +27,6 @@ export class ThreeObject {
         if (!setUp.AllElementTypes.includes(this.constructor.name)){
             setUp.AllElementTypes.push(this.constructor.name);
         }
-
-    }
-
-
-    //*Chemistry 
-    //? is there a better way to do this?
-    bond(other:ThreeObject):void{
-
-        //*element with element
-        if (other instanceof ThreeElement && this instanceof ThreeElement){
-            //don't bond if stable
-            if (this.isStable() || other.isStable()){return;}
-
-            //check for Ion bond
-            if (Math.abs(this.element.electronegativity - other.element.electronegativity) > 1.7){
-                this.ionBond(other);
-            }
-
-            //check for covalent bond
-            else if (Math.abs(this.element.electronegativity - other.element.electronegativity) < 1.7){
-                this.covalentBond(other);
-            }
-
-            this.bonded = true;
-            this.updateStability();
-            other.updateStability();
-        }
-
-        //?element with compound
-        else if (this instanceof ThreeElement && other instanceof THREECompound){}
-
-        //?compound with compound
-        else if (this instanceof THREECompound && other instanceof THREECompound){}
     }
 }
 
@@ -231,7 +209,6 @@ export class ThreeElement extends ThreeObject{
             if (this.id != other.id){                
                 //* crash
                 if (functions.getdistance(this, other) < 1){  
-                    this.bond(other);                    
                     return other;
                 }
             }
@@ -255,88 +232,16 @@ export class ThreeElement extends ThreeObject{
 
 
 
-export class THREECompound extends ThreeObject{
-    elements: ThreeElement[];
-    group: THREE.Group;
-    lines: THREE.Line[];
-    
-
-    constructor(...newElements){
-        
-        super();
-        this.group = new THREE.Group;
-        this.elements = [];
-        const fixedLenght = newElements.length; 
-        this.lines = [];       
-
-        for (let i = 0; i < fixedLenght; i++){            
-            let newElement = new ThreeElement(newElements[i]);
-            this.group.add(newElement.ball);
-            this.elements.push(newElement);
-            // newElements.push(newElement);
-        }
-        setUp.scene.add(this.group);
-    }
-
-    makeLines():void{
-        let position = this.elements[0].ball.getWorldPosition(new THREE.Vector3);
-        
-
-
-        for (let i = 1; i < this.elements.length; i++){
-            const thickness = 10000;
-            const color = 0x000000;
-
-            let positioni = this.elements[i].ball.getWorldPosition(new THREE.Vector3);
-
-            const geometry = new THREE.BufferGeometry();
-            geometry.setFromPoints([
-                position,
-                positioni
-            ]);            
-
-            const material = new THREE.LineBasicMaterial({
-                  linewidth: thickness,
-                  vertexColors : true,
-                  blending: THREE.AdditiveBlending,
-                });
-
-
-            let line = new THREE.LineSegments(geometry, material);
-            line.castShadow = true;
-            line.receiveShadow = true;
-            
-            setUp.scene.add(line);
-            
-
-            this.lines.push(line);
-        }
-    }
 
 
 
 
-    getMolecularGeometry():void{
-        let vsepr:string;
-        let centralElement = this.elements[0];
-        functions.VSEPRtheory()
-    }
-}
 
 
 
 export class THREE_LJ extends ThreeObject{
-distance    :number;    //sigmas
-time        :number;    //reduced LJ tau
-mass        :number;    //ratio to unitless 1.0
-temperature :number;    //reduced LJ temp
-pressure    :number;    //reduced LJ pressure
-energy      :number;    //Kcal/mole
-velocity    :number;    //Angstroms/femtosecond
-force       :number;    // grams/mole * Angstroms/femtosecond^2
-charge      :number;    //+/- 1.0 is proton/electron
 
-ball       :THREE.Mesh;
+    ball       :THREE.Mesh;
     
     constructor(){
         super();

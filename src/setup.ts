@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
-import { ThreeElement, THREECompound, THREE_LJ, ThreeObject } from './classes';
+import { ThreeElement, THREE_LJ, ThreeObject } from './classes';
 // import { LennardJonesUnits } from './LAMMPS/classes';
 
 
@@ -8,7 +8,6 @@ import { ThreeElement, THREECompound, THREE_LJ, ThreeObject } from './classes';
 export const SIMULATOR = document.getElementById('simulator');
 export let AllElements: (ThreeElement | THREE_LJ)[] = [];
 export let AllElementTypes: String[] = [];
-export let allCompounds: THREECompound[] = [];
 
 //!THREE.JS  set up
 export const scene = new THREE.Scene();

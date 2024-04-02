@@ -215,6 +215,7 @@ export function lammpsRead(instructions: string[]) {
                 break;
 
             case 'velocity':
+                commands.velocity(splittedInstruction[1], splittedInstruction[2], ...splittedInstruction.slice(3));
                 break;
 
             
@@ -271,6 +272,41 @@ export function lammpsRead(instructions: string[]) {
 
             case 'special_bonds':
                 break;
+
+
+            //*settings
+
+
+            //*Operations within timestepping
+            case 'compute':
+                break;
+
+            case 'compute_modify':
+                break;
+
+            case 'fix':
+                commands.fix(Number.parseInt(splittedInstruction[1]), splittedInstruction[2], splittedInstruction[3]);
+                break;
+
+            case 'fix_modify':
+                break;
+
+            case 'uncompute':
+                break;
+            
+            case 'unfix':
+                break;
+
+
+            //*output
+
+            //*Actions
+
+            case 'run':
+                commands.run(Number.parseInt(splittedInstruction[1]), splittedInstruction[2]);
+                break;
+
+            //* Input control
 
         }
         
