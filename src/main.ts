@@ -14,6 +14,8 @@ import * as lammps from  './LAMMPS/lammps_converter';
 let lj = new THREE_LJ();
 lj.ball.position.x += 12;
 
+
+
 // !lammps TEST
 lammps.lammpsRead(lammps.cleanInput(lammps.input));
 

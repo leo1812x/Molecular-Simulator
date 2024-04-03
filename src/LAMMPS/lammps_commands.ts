@@ -1,4 +1,3 @@
-import * as THREE from 'three';
 import * as setUp from '../setup';
 import * as classes from '../classes';
 
@@ -22,6 +21,7 @@ export let currentLattice: Lattice
 export let pairStyle_func = '4*e*(((o/r)^12) - ((o/r)^6))'
 export let pairStyle_cutoff = 2.5;
 export let pair_style_style;
+export let timesteps = 1.0;
 
 //? i should organize this too
 //* Initialation
@@ -514,7 +514,7 @@ function rerun (){
 //run             1000
 //*working on this yk
 function run (N:number, keyword: string, ...args: String[]){
-
+    timesteps = N
 
 
 }

@@ -30,13 +30,7 @@ import * as commands from  './lammps_commands';
 
                 `
 
-interface variables {
-    key: string
-    value: string
-}
     
-let inputVariables: variables[]
-
 export function cleanInput (input: string){
     //*make each line into an array
     let inputAsArray = input.split((/\r?\n|\r|\n/g));
