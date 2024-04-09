@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import * as setUp from '../setup';
+import * as setUp from './setup';
 
 export let boxForHelper: THREE.BoxGeometry;
 
@@ -18,6 +18,7 @@ export class Region {
     private y: number;
     private z: number;
 
+    
 
     //*this deals with the input logic for the style parameter
     constructor(id: string, style: string, ...args: string[]) {

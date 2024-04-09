@@ -1,8 +1,7 @@
-import * as setUp from '../setup';
-import * as classes from '../classes';
+import * as setUp from './setup';
+import * as classes from './classes';
 
-import {Region, boxForHelper, Lattice}  from './classes';
-import * as functions from '../functions';
+import {Region, boxForHelper, Lattice}  from './lammps_classes';
 import * as THREE from 'three';
 
 
@@ -329,19 +328,19 @@ function pair_coeff (I: string, J: string, ...args: string[]){
                 if (atomB.constructor.name == setUp.AllElementTypes[J] || J == '*'){
                     
 
-                    let distance = functions.getdistance(atomA, atomB);
-                    if (distance < pairStyle_cutoff){
+                    // let distance = functions.getdistance(atomA, atomB);
+                    // if (distance < pairStyle_cutoff){
 
-                        let e = parseFloat(args[0]); //epsilon
-                        let o = parseFloat(args[1]); //sigma
-                        let r = distance;
+                    //     let e = parseFloat(args[0]); //epsilon
+                    //     let o = parseFloat(args[1]); //sigma
+                    //     let r = distance;
                     
-                        if (pair_style_style == "lj/cut"){
-                            const func = 4*e*(((o/r)^12) - ((o/r)^6));
+                    //     if (pair_style_style == "lj/cut"){
+                    //         const func = 4*e*(((o/r)^12) - ((o/r)^6));
                             
 
-                        }
-                    }
+                    //     }
+                    // }
                 }
             }
         }

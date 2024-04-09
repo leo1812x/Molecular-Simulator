@@ -1,12 +1,11 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
-import { ThreeElement, THREE_LJ, ThreeObject } from './classes';
-// import { LennardJonesUnits } from './LAMMPS/classes';
+import { THREE_LJ, ThreeObject } from './classes';
 
 
 //!Set up
 export const SIMULATOR = document.getElementById('simulator');
-export let AllElements: (ThreeElement | THREE_LJ)[] = [];
+export let AllElements: THREE_LJ[] = [];
 export let AllElementTypes: String[] = [];
 
 //!THREE.JS  set up
