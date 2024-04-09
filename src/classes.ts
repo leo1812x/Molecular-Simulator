@@ -33,25 +33,22 @@ export class ThreeObject {
         //*old position and get parameters
         const rOld = this.ball.position.clone();
         const vel = this.velocity.clone();
-        const acc = functions.getAcceleration(this, other);
+        const acc = this.getAcceleration(other);
     
         //*update position
         // New position r = r_old + v*dt + 0.5*a*dt^2
-        const newPosition = rOld.clone().add(vel.clone().multiplyScalar(dt)).add(acc.clone().multiplyScalar(0.5 * dt * dt));
+        const newPosition = rOld.add(vel.clone().multiplyScalar(dt)).add(acc.multiplyScalar(0.5 * dt * dt));
         this.ball.position.copy(newPosition);
-    
+        
         //* Calculate new acceleration based on new position
-        // Typically, you would update the forces here if they depend on position or other properties that could have changed.
-        // Since you're passing 'other' which is not updated here, let's assume it's static or this update is managed elsewhere.
-        const newAcc = functions.getAcceleration(this, other);  // This might need to be adjusted to reflect new positions.
+        const newAcc = this.getAcceleration(other); // Recalculate acceleration with the new position
     
-        //*update velocity
+        //*update velocity with the second half of the velocity Verlet
         // New velocity v = v_old + 0.5*(a_old + a_new)*dt
-        const newVelocity = vel.add(acc.add(newAcc).multiplyScalar(0.5 * dt));
-        this.velocity.copy(newVelocity);
-    
+        this.velocity.add(acc.multiplyScalar(0.5 * dt));  // Add the initial acceleration
+        this.velocity.add(newAcc.multiplyScalar(0.5 * dt)); // Add the new acceleration
     }
-    
+            
 
     lennardJonesForce(other: ThreeObject): THREE.Vector3 {
         //* get the distance between the two particles as vector
@@ -72,6 +69,18 @@ export class ThreeObject {
         return forceVector;
     }
 
+    getAcceleration(other:ThreeObject):THREE.Vector3{
+
+        //*get the force vector of this element acting on the other element
+        const forceVector = this.lennardJonesForce(other);
+    
+        //*get the acceleration vector
+        //? i don't know the math behind this
+        const acceleration = forceVector.divideScalar(this.mass);
+    
+        return acceleration;
+    }
+    
 }
 
 

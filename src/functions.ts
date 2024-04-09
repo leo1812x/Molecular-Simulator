@@ -20,18 +20,6 @@ export function getVelocity(element:ThreeElement):number{
     return velocity
 }
 
-export function getAcceleration(element:ThreeObject, other:ThreeObject):THREE.Vector3{
-
-    //*get the force vector of this element acting on the other element
-    const forceVector = element.lennardJonesForce(other);
-
-    //*get the acceleration vector
-    //? i don't know the math behind this
-    const acceleration = forceVector.divideScalar(element.mass);
-
-    return acceleration;
-}
-
 
 export function AMU_TO_KG(AMU:number):number{
     return AMU * 1.66053906660e-27;

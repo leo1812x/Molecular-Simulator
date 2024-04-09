@@ -246,7 +246,11 @@ function velocity (group:string, style:string, ...args: string[]){
                 let temp = parseFloat(args[0]);
                 let randomSeed = parseFloat(args[1]);
 
-                setUp.AllElements[i].velocity = new THREE.Vector3(temp, temp, temp);
+                
+
+                setUp.AllElements[i].velocity = new THREE.Vector3(Math.random() * 2 -1, 
+                                                                  Math.random() * 2 -1,
+                                                                  Math.random() * 2 -1);
                 
 
             }

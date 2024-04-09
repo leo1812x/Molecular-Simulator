@@ -17,7 +17,7 @@ import * as commands from  './lammps_commands';
                     
                 # Settings
                     pair_style      lj/cut 2.5
-                    pair_coeff      *   *   1   1
+                    pair_coeff      *   *   1.0   1.0
                     
                     mass            *   1.0
                     velocity        all create  1.0 23494

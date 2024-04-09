@@ -36,12 +36,12 @@ function animate() {
     //!TEST ANIMATIONS HERE:
 
     setUp.AllElements.forEach( element => {
-        main.stormerVerlet(ts, second);
-        main.stormerVerlet(ts, third);
-        second.stormerVerlet(ts, main);
-        second.stormerVerlet(ts, third);
-        third.stormerVerlet(ts, main);
-        third.stormerVerlet(ts, second);
+        setUp.AllElements.forEach( element2 => {
+            if(element != element2){
+                element.stormerVerlet(ts,element2);
+            }
+                
+        });
     });
 
 
