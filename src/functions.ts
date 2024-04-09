@@ -1,19 +1,14 @@
 import * as THREE from 'three';
-import { THREE_LJ, ThreeElement} from './classes';
-import { boxForHelper } from './LAMMPS/classes';
-// import { LennardJonesUnits } from './LAMMPS/classes';
+import { THREE_LJ, ThreeElement, ThreeObject} from './classes';
 
-//!CONSTANTS CONSTANTS
-//*Boltzmann constant
+
 const BOLTZMANN_CONSTANT = 1.38064852e-23; 
 
-//!CONSTANTS VARIABLES
+
 //*atomic constants
-const K = 1;        //sprig constant
+const K = 1;          //sprig constant
 const D = 0.7;        //default distance
 
-//*newton's custom constants
-const dt = 0.1;     //time step
 
 const temperature = 0.0005;    //temperature (in kelvin)
 
@@ -22,29 +17,41 @@ export function getVelocity(element:ThreeElement):number{
     //*Thermal Velocity using  the Maxwell-Boltzmann Distribution
     let atomicMass = AMU_TO_KG(Number(element.element.atomicMass.toString().slice(0, 6)));
     let velocity = Math.sqrt((3 * BOLTZMANN_CONSTANT * temperature) / atomicMass);    
-    console.log(velocity);
     return velocity
 }
 
+export function getAcceleration(element:ThreeObject, other:ThreeObject):THREE.Vector3{
+
+    //*get the force vector of this element acting on the other element
+    const forceVector = element.lennardJonesForce(other);
+
+    //*get the acceleration vector
+    //? i don't know the math behind this
+    const acceleration = forceVector.divideScalar(element.mass);
+
+    return acceleration;
+}
 
 
 export function AMU_TO_KG(AMU:number):number{
     return AMU * 1.66053906660e-27;
 }
 
-export function keepInBounds(element:(ThreeElement | THREE_LJ)):void{
-    //*get the element position
-    let {x, y, z} = element.ball.position;
+// export function keepInBounds(element:(ThreeElement | THREE_LJ)):void{
+//     //*get the element position
+//     let {x, y, z} = element.ball.position;
 
-    //*if the element is out of bounds, reflect it
-    if (Math.abs(x) > boxForHelper.parameters.width / 2 ||
-        Math.abs(y) > boxForHelper.parameters.height / 2 ||
-        Math.abs(z) > boxForHelper.parameters.depth / 2){
-        element.velocity *= -1;
-    }
+//     //*if the element is out of bounds, reflect it
+//     if (Math.abs(x) > boxForHelper.parameters.width / 2 ||
+//         Math.abs(y) > boxForHelper.parameters.height / 2 ||
+//         Math.abs(z) > boxForHelper.parameters.depth / 2){
+    
+    //?need to fix this line for it to work again
+//         element.velocity *= -1;
+//     }
 
 
-}
+// }
 
 export function getdistance(thisElement:(ThreeElement | THREE_LJ), otherElement:(ThreeElement | THREE_LJ)):number{
     //*get circles coordenates
@@ -92,11 +99,12 @@ export function generaterandomposition():THREE.Vector3{
     return new THREE.Vector3(x, y, z);   
 }
 
-export function updatePosition(element:(ThreeElement | THREE_LJ)):void{
-    let newX = element.ball.position.x += element.velocity*dt;
-    let newY = element.ball.position.y += element.velocity*dt;
-    let newZ = element.ball.position.z += element.velocity*dt;
-}
+//? not support anymore
+// export function updatePosition(element:(ThreeElement | THREE_LJ)):void{
+//     let newX = element.ball.position.x += element.velocity*dt;
+//     let newY = element.ball.position.y += element.velocity*dt;
+//     let newZ = element.ball.position.z += element.velocity*dt;
+// }
 
 
 
@@ -121,6 +129,7 @@ export function getAnglesEnergy(first:ThreeElement, second:ThreeElement, third:T
 
 }
 
+
 //!force acting
 export function getForce(first:ThreeElement, second:ThreeElement):number{
     // let answernode = math.derivative(getDistanceEnergy(first, second).toString(), 'x');
@@ -131,6 +140,33 @@ export function getForce(first:ThreeElement, second:ThreeElement):number{
     // return (answer);
     return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 export function VSEPRtheory(lonePairs?,...elements:ThreeElement[]){
     //*atoms bonded to central atom
@@ -273,3 +309,5 @@ export function VSEPRtheory(lonePairs?,...elements:ThreeElement[]){
                 }
             }
     }
+
+

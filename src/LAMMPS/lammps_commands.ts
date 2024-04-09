@@ -3,6 +3,7 @@ import * as classes from '../classes';
 
 import {Region, boxForHelper, Lattice}  from './classes';
 import * as functions from '../functions';
+import * as THREE from 'three';
 
 
 //* Initialization of variables
@@ -245,6 +246,9 @@ function velocity (group:string, style:string, ...args: string[]){
                 let temp = parseFloat(args[0]);
                 let randomSeed = parseFloat(args[1]);
 
+                setUp.AllElements[i].velocity = new THREE.Vector3(temp, temp, temp);
+                
+
             }
 
         }
@@ -304,6 +308,10 @@ function pair_coeff (I: string, J: string, ...args: string[]){
 
     for (let i = 0; i < setUp.AllElements.length; i++){
         let atomA = setUp.AllElements[i];
+
+        atomA.energy = Number.parseInt(args[0]);
+        atomA.distance = Number.parseInt(args[1]);
+
         for (let j = 0; j < setUp.AllElements.length; j++){
             let atomB = setUp.AllElements[j];
 
@@ -311,7 +319,7 @@ function pair_coeff (I: string, J: string, ...args: string[]){
             if (atomA == atomB) continue;
 
             //* if atom is I or *
-            if (atomA.constructor.name == setUp.AllElementTypes[I] ||I == '*'){
+            if (atomA.constructor.name == setUp.AllElementTypes[I] || I == '*'){
                 
                 //* if atom is J or *
                 if (atomB.constructor.name == setUp.AllElementTypes[J] || J == '*'){

@@ -14,7 +14,7 @@ export class ThreeObject {
     temperature :number;    //reduced LJ temp
     pressure    :number;    //reduced LJ pressure
     energy      :number;    //Kcal/mole
-    velocity    :number;    //Angstroms/femtosecond
+    velocity    :THREE.Vector3;    //Angstroms/femtosecond
     force       :number;    // grams/mole * Angstroms/femtosecond^2
     charge      :number;    //+/- 1.0 is proton/electron
     Boltzmann   :number;    
@@ -28,7 +28,90 @@ export class ThreeObject {
             setUp.AllElementTypes.push(this.constructor.name);
         }
     }
+
+    stormerVerlet(dt: number, other: ThreeObject): void {
+        //*old position and get parameters
+        const rOld = this.ball.position.clone();
+        const vel = this.velocity.clone();
+        const acc = functions.getAcceleration(this, other);
+    
+        //*update position
+        // New position r = r_old + v*dt + 0.5*a*dt^2
+        const newPosition = rOld.clone().add(vel.clone().multiplyScalar(dt)).add(acc.clone().multiplyScalar(0.5 * dt * dt));
+        this.ball.position.copy(newPosition);
+    
+        //* Calculate new acceleration based on new position
+        // Typically, you would update the forces here if they depend on position or other properties that could have changed.
+        // Since you're passing 'other' which is not updated here, let's assume it's static or this update is managed elsewhere.
+        const newAcc = functions.getAcceleration(this, other);  // This might need to be adjusted to reflect new positions.
+    
+        //*update velocity
+        // New velocity v = v_old + 0.5*(a_old + a_new)*dt
+        const newVelocity = vel.add(acc.add(newAcc).multiplyScalar(0.5 * dt));
+        this.velocity.copy(newVelocity);
+    
+    }
+    
+
+    lennardJonesForce(other: ThreeObject): THREE.Vector3 {
+        //* get the distance between the two particles as vector
+        let rVec = other.ball.position.clone().sub(this.ball.position);
+        
+        //*get the variables for the function 
+        let r = rVec.length();
+        let e = this.energy;
+        let o = this.distance;
+
+        //*calculate the force
+        let force = 4 * e * (Math.pow((o / r), 12) - Math.pow((o / r), 6)) / (r * r);
+        
+         //* Normalize rVec to get direction and multiply by force magnitude
+         //? i don't know the math behind this
+        let forceVector = rVec.normalize().multiplyScalar(force);
+
+        return forceVector;
+    }
+
 }
+
+
+
+
+export class THREE_LJ extends ThreeObject{
+
+    ball       :THREE.Mesh;
+    
+    constructor(){
+        super();
+        
+        //* set three.js atributes
+        setUp.AllElements.push(this);
+        this.ball = new THREE.Mesh((new THREE.SphereGeometry(0.1, 32, 32)),new THREE.MeshBasicMaterial({color: 0xffff00}))
+        setUp.scene.add(this.ball);
+        this.velocity = new THREE.Vector3(0,0,0);
+
+
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -54,7 +137,7 @@ export class ThreeElement extends ThreeObject{
     max:number;
     bonded:boolean;
     electrons: number;
-    velocity: number;
+    velocity: THREE.Vector3;
 
 
     constructor(element) {
@@ -70,8 +153,6 @@ export class ThreeElement extends ThreeObject{
         this.ball.position.y += 1;
         setUp.scene.add(this.ball);
         
-        //*asssing random velocity
-        this.velocity = functions.getVelocity(this);
 
         //*find the number of valence. then add them as electrons to the scene
         this.initialStability();        
@@ -239,22 +320,6 @@ export class ThreeElement extends ThreeObject{
 
 
 
-export class THREE_LJ extends ThreeObject{
-
-    ball       :THREE.Mesh;
-    
-    constructor(){
-        super();
-        
-        //* set three.js atributes
-        setUp.AllElements.push(this);
-        this.ball = new THREE.Mesh((new THREE.SphereGeometry(0.1, 32, 32)),new THREE.MeshBasicMaterial({color: 0xffff00}))
-        setUp.scene.add(this.ball);
-        this.velocity = 2;
-
-
-    }
-}
 
 
 
