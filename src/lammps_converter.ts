@@ -3,34 +3,44 @@ import * as commands from  './lammps_commands';
 //* This function will convert the input string from LAMMPS output and 
 //* convert it into a sequence of outputs that can be used by my program
     export let input =`
+# initialization
+units           lj
+dimension       3       #only support
+atom_style      atomic  #only support
 
-                # initialization
-                    units           lj&
-                    dimension       2
-                    atom_style      atomic  #test
-                # Atom definition
-                    
-                    lattice         sq  0.1
-                    region  simbox   block 0 5 0 5 0 5
-                    create_box      1   simbox      
-                    create_atoms    1   box
-                    
-                # Settings
-                    pair_style      lj/cut 2.5
-                    pair_coeff      *   *   1.0   1.0
-                    
-                    mass            *   1.0
-                    velocity        all create  1.0 23494
-                    
-                # Run
-                    fix             1   all nve
-                    dump            1 all custom 10 output.txt id xs ys zs
-                    
-                    run             1000
+# Atom definition  
+lattice         sq 1.0 
+region  simbox   block 0 5 0 5 0 5
+create_box      1   simbox      
+create_atoms    1   box
+        
+# Settings
+pair_style      lj/cut 2.5  #not supported yet
+pair_coeff      *   *   1.0   1.0    
+mass            *   1.0
+velocity        all create  1.0 23494
+        
+# Run
+fix             1   all nve
+dump            1 all custom 10 output.txt id xs ys zs 
+run             1000
+`
+//*write input file to the DOM
+document.querySelector('.input-file').innerHTML = `${input}`;
 
-                `
 
-    
+
+//*get eddited input file from the DOM
+
+document.querySelector('.run-button').addEventListener('click', function() {
+    let inputFromFile = document.querySelector('.input-file').innerHTML;
+    input = inputFromFile;
+
+    lammpsRead(cleanInput(input));
+
+});
+
+
 export function cleanInput (input: string){
     //*make each line into an array
     let inputAsArray = input.split((/\r?\n|\r|\n/g));

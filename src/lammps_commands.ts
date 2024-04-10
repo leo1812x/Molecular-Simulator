@@ -1,7 +1,6 @@
 import * as setUp from './setup';
 import * as classes from './classes';
-
-import {Region, boxForHelper, Lattice}  from './lammps_classes';
+import {Region, Lattice}  from './lammps_classes';
 import * as THREE from 'three';
 
 
@@ -22,6 +21,11 @@ export let pairStyle_func = '4*e*(((o/r)^12) - ((o/r)^6))'
 export let pairStyle_cutoff = 2.5;
 export let pair_style_style;
 export let timesteps = 1.0;
+export let boxForHelper: THREE.BoxGeometry;
+
+
+
+
 
 //? i should organize this too
 //* Initialation
@@ -75,11 +79,26 @@ function change_box (){
 }
 
 //*if the region id is correct, create a THREE box
-function create_box (n: string, id: string, ...args: any[]){        
-    if (id == currentRegion.getId()) currentRegion.createBox();
+function create_box (id: string, ...args: string[]){          
+        if ( currentRegion.style == 'block'){
+            
+            //*create a box helper with the dimensions of the block
+            boxForHelper = new THREE.BoxGeometry(currentRegion.x, currentRegion.y, currentRegion.z);
+            const object = new THREE.Mesh( boxForHelper, new THREE.MeshBasicMaterial() );
+            const BoxHelper = new THREE.BoxHelper( object, 0xffff00 );
+    
+            //*add the box helper to the scene
+            setUp.scene.add( BoxHelper );
+
+            
+    
+        }
+
+
 }
 
 //? this is not doing anything right now
+//? only supports 3d right now
 export function dimension1 ( dim: number){
 
     dimension = 2 || 3 ? dim : dimension;
@@ -118,6 +137,7 @@ function atom_modify (){
 }
 
 //? not doing anything right now
+//? only supports atomic right now
 export function atom_styles ( style: string, ...args: any[]){
     atom_style ="amoeba"||"angle"     ||"atomic"    ||"body"     ||
                 "bond"  ||"charge"    ||"dielectric"||"dipole"   ||
@@ -141,53 +161,51 @@ function create_atoms (type: string, style: string,){
     //*check for exceptions
     if (boxForHelper != undefined && lattice_tyle != null){
         
-    //?everything below should be done by lattice command    
-    // Pre-calculate half of the dimensions to avoid doing it in every iteration
-    const halfHeight = boxForHelper.parameters.height / 2;
-    const halfWidth = boxForHelper.parameters.width / 2;
-    const halfDepth = boxForHelper.parameters.depth / 2;
+        //* Pre-calculate half of the dimensions to avoid doing it in every iteration
+        const halfHeight = boxForHelper.parameters.height / 2;
+        const halfWidth = boxForHelper.parameters.width / 2;
+        const halfDepth = boxForHelper.parameters.depth / 2;
 
-    //* takes care of box (0,0,0) exception
-    if (halfHeight > 0 && halfWidth > 0 && halfDepth > 0) {
-        const originAtom = new classes.THREE_LJ();
-        originAtom.ball.position.set(0, 0, 0);
-        setUp.scene.add(originAtom.ball);
-    }
 
-// Then iterate over each dimension starting from 1 to avoid duplicate positions at the origin
-    for (let i = 0; i < halfHeight; i++) {
-        for (let j = 0; j < halfWidth; j++) {
-            for (let k = 0; k < halfDepth; k++) {
-                // Skip the origin which was already added
-                if (i === 0 && j === 0 && k === 0) continue;
+        //* Define bounds based on half the box dimensions
+        const bounds = {
+            x: [0, halfWidth],
+            y: [0, halfHeight],
+            z: [0, halfDepth]
+        };
 
-                //? I think the Lattice should influence the position of the atoms
-                const positions = [];
+        // Iterate over each dimension
+        for (let i = bounds.x[0]; i <= bounds.x[1]; i += lattice_scale) {
+            for (let j = bounds.y[0]; j <= bounds.y[1]; j += lattice_scale) {
+                for (let k = bounds.z[0]; k <= bounds.z[1]; k += lattice_scale) {
 
-                // Always add the positive position
-                positions.push({ x: i, y: j, z: k });
+                    //* Calculate positions ensuring not to exceed box dimensions
+                    const positions = [];
 
-                // Add negative positions only if indices are not 0 to avoid duplicates
-                if (i > 0) positions.push({ x: -i, y: j, z: k });
-                if (j > 0) positions.push({ x: i, y: -j, z: k });
-                if (k > 0) positions.push({ x: i, y: j, z: -k });
-                if (i > 0 && j > 0) positions.push({ x: -i, y: -j, z: k });
-                if (i > 0 && k > 0) positions.push({ x: -i, y: j, z: -k });
-                if (j > 0 && k > 0) positions.push({ x: i, y: -j, z: -k });
-                if (i > 0 && j > 0 && k > 0) positions.push({ x: -i, y: -j, z: -k });
+                    //* Calculate all symmetrical positions
+                    for (let dx of (i === 0 ? [0] : [-i, i])) {
+                        for (let dy of (j === 0 ? [0] : [-j, j])) {
+                            for (let dz of (k === 0 ? [0] : [-k, k])) {
+                                // Skip the origin which was already added
+                                if (dx === 0 && dy === 0 && dz === 0) continue;
+                                
+                                positions.push({ x: dx, y: dy, z: dz });
+                            }
+                        }
+                    }
 
-                // Create and add atoms for all calculated positions
-                positions.forEach(pos => {
-                    const atom = new classes.THREE_LJ();
-                    atom.ball.position.set(pos.x, pos.y, pos.z);
-                    setUp.scene.add(atom.ball);
-                });
+                    //* Create and add atoms for all calculated positions
+                    positions.forEach(pos => {
+                        const atom = new classes.THREE_LJ();
+                        atom.ball.position.set(pos.x, pos.y, pos.z);
+                        setUp.scene.add(atom.ball);
+                    });
+                }
             }
         }
     }
 }
-
-}
+ 
 function create_bonds (){
 
 }
@@ -302,7 +320,7 @@ function kspace_style (){
 
 }
 
-//* working on this yk
+//pair_coeff      *   *   1.0   1.0
 function pair_coeff (I: string, J: string, ...args: string[]){
     //* i need to grab the atom types who's the potential will be computed
     //* i also need to grab the atom's who's proximity is less than the cutoff
@@ -328,19 +346,6 @@ function pair_coeff (I: string, J: string, ...args: string[]){
                 if (atomB.constructor.name == setUp.AllElementTypes[J] || J == '*'){
                     
 
-                    // let distance = functions.getdistance(atomA, atomB);
-                    // if (distance < pairStyle_cutoff){
-
-                    //     let e = parseFloat(args[0]); //epsilon
-                    //     let o = parseFloat(args[1]); //sigma
-                    //     let r = distance;
-                    
-                    //     if (pair_style_style == "lj/cut"){
-                    //         const func = 4*e*(((o/r)^12) - ((o/r)^6));
-                            
-
-                    //     }
-                    // }
                 }
             }
         }
@@ -525,7 +530,31 @@ function rerun (){
 //run             1000
 //*working on this yk
 function run (N:number, keyword: string, ...args: String[]){
-    timesteps = N
+
+    let ts = 0.000005;
+
+//*animation loop
+function animate() {
+	requestAnimationFrame( animate );
+   
+    //* run the simulation for N timesteps
+    if (N > 0){
+        setUp.AllElements.forEach( element => {
+            setUp.AllElements.forEach( element2 => {
+                if(element != element2){
+                    element.stormerVerlet(ts,element2);
+                }
+                    
+            });
+        });
+        
+    }
+
+
+    //!
+	setUp.renderer.render( setUp.scene, setUp.camera );
+} animate();
+
 
 
 }

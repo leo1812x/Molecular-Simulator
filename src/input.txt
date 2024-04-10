@@ -1,6 +1,6 @@
 # initialization
 units           lj
-dimension       2
+dimension       3       
 atom_style      atomic
 
 # Atom definition

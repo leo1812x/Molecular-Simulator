@@ -1,22 +1,14 @@
-import * as THREE from 'three';
-import * as setUp from './setup';
 
-export let boxForHelper: THREE.BoxGeometry;
-
-
-//*classes for the LAMMPS commands
-
-
-
+//!classes for the LAMMPS commands
 
 //*This class is a wraper for the THREE box that will be used to represent the region
 //*this is created on the LAMMPS region command
 export class Region {
-    private id: string;
-    private style: string;
-    private x: number;
-    private y: number;
-    private z: number;
+    id: string;
+    style: string;
+    x: number;
+    y: number;
+    z: number;
 
     
 
@@ -33,38 +25,14 @@ export class Region {
             
 
             //*get the dimensions of the block
-            this.x = Math.abs(Number.parseInt(args[1])) + Math.abs(Number.parseInt( args[0]));
-            this.y = Math.abs(Number.parseInt(args[3]) + Math.abs(Number.parseInt(args[2])));
-            this.z = Math.abs(Number.parseInt(args[5])) + Math.abs(Number.parseInt(args[4]));        
-        }
-    
-    }
-    //*getters
-    public getId(): string {return this.id;}
-    public getStyle(): string {return this.style;}
-
-    //*create the THREE box 
-    public createBox(){
-        if ( this.getStyle() == 'block'){
-
-            
-            //*create a box helper with the dimensions of the block
-            boxForHelper = new THREE.BoxGeometry(this.x, this.y, this.z);
-            const object = new THREE.Mesh( boxForHelper, new THREE.MeshBasicMaterial() );
-            const BoxHelper = new THREE.BoxHelper( object, 0xffff00 );
-    
-            //*add the box helper to the scene
-            setUp.scene.add( BoxHelper );
-
-            
-    
+            this.x = Math.abs(Number.parseInt(args[0])) + Math.abs(Number.parseInt( args[1]));
+            this.y = Math.abs(Number.parseInt(args[2]) + Math.abs(Number.parseInt(args[3])));
+            this.z = Math.abs(Number.parseInt(args[4])) + Math.abs(Number.parseInt(args[5]));        
         }
     }
-
 }
 
 //*This class is for the lattice which is the arrangement of the atoms in the simulation
-//? THIS IS CURRENTLY NOT USED (not implemented as it should be)
 export class Lattice {
     private style: string;
     private scale = 1.0;

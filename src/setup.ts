@@ -10,7 +10,7 @@ export let AllElementTypes: String[] = [];
 
 //!THREE.JS  set up
 export const scene = new THREE.Scene();
-export const camera = new THREE.PerspectiveCamera( 25, window.innerWidth / window.innerHeight, 0.1, 1000 );
+export const camera = new THREE.PerspectiveCamera( 25, window.innerWidth / window.innerHeight, 1.0, 100 );
 export const renderer = new THREE.WebGLRenderer();
 
 
@@ -22,7 +22,10 @@ const controls = new OrbitControls(camera, renderer.domElement);
 renderer.setSize( SIMULATOR.getBoundingClientRect().width, SIMULATOR.getBoundingClientRect().height );
 renderer.setPixelRatio(window.devicePixelRatio)
 SIMULATOR.appendChild(renderer.domElement)
-camera.position.z = 50;
+camera.position.z = 20;
+camera.position.y = 10;
+camera.position.x = 4;
+camera.rotateX(-0.5);
 
 scene.add( gridHelper ); //boxhelper was here too
 
