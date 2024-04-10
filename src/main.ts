@@ -1,4 +1,5 @@
-import './styles/index.css';
+// import './styles/index.css';
+import './index.css'
 
 import * as lammps from  './lammps_converter';
 
