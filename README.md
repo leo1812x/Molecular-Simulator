@@ -13,3 +13,4 @@ This Project is MoleculaR Dynamics Simulator made using Vite, TypeScript and Thr
 - [ ] work on keep particles in box 
 - [ ] fix particles so they don't expell each other to infinity
 - [ ] learn how to host it on a website
+- [ ] make run button work properly
