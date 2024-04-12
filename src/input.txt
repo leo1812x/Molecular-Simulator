@@ -1,6 +1,6 @@
 # initialization
 units           lj
-dimension       3       
+dimension       2       
 atom_style      atomic
 
 # Atom definition
@@ -15,7 +15,7 @@ pair_style      lj/cut 2.5
 pair_coeff      *   *   1   1
 
 mass            *   1.0
-velocity        all create  1.0 23494
+velocity        all create  3.0 23494
 
 # Run
 fix             1   all nve
