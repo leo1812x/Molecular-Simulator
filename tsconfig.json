@@ -3,7 +3,7 @@
       "target": "es6",  // or use "es2015"
       "module": "commonjs",
       "lib": ["dom", "es2015", "es2016", "es2017", "ES2023"],  // Ensure all needed libs are included
-      "outDir": "./dist",
+      "outDir": "./docs",
       
     }
   }
