@@ -5,7 +5,7 @@ import * as commands from  './lammps_commands';
     export let input =`
 # initialization
 units           lj
-dimension       3       #only support
+dimension       2       #only support
 atom_style      atomic  #only support
 
 # Atom definition  
