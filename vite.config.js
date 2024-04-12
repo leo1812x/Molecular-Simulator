@@ -1,4 +1,9 @@
+
 // vite.config.js
 export default {
-    base : '/<REPO>/'
-  }
+    base : '/<REPO>/',
+
+}
+  
+
+  

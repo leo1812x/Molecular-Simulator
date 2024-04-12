@@ -2,7 +2,7 @@
   "name": "molecular-simulator",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
+  "type": "commonjs",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -14,8 +14,6 @@
     "vite": "^4.5.0"
   },
   "dependencies": {
-    "@types/mathjs": "^9.4.2",
-    "mathjs": "^12.1.0",
     "three": "^0.158.0"
   }
 }
