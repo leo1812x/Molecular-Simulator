@@ -1,7 +1,7 @@
 
 // vite.config.js
 export default {
-    base : '/<REPO>/',
+    // base : '/<REPO>/',
     build: {
       outDir: 'docs'
     }
