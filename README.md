@@ -3,7 +3,7 @@
 This Project is MoleculaR Dynamics Simulator made using Vite, TypeScript and Three.js
 
 > [!IMPORTANT]
-> This site will be hosted here: [GitHub Pages](https://leo1812x.github.io/Molecular-Simulator/).
+> This site is hosted here: [GitHub Page](https://leo1812x.github.io/Molecular-Simulator/).
 
 
 ![plot](./src/images/example.png)
