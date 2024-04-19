@@ -1,10 +1,5 @@
 import * as commands from  './lammps_commands';
 
-console.log('converter loaded');
-
-
-//* This function will convert the input string from LAMMPS output and 
-//* convert it into a sequence of outputs that can be used by my program
 export let input =`
 # initialization
 units           lj
@@ -33,23 +28,30 @@ run             1000
 document.querySelector('.input-file').innerHTML = `${input}`;
 
 
-
-export function getInput(): string{
-    return document.querySelector('.input-file').innerHTML;
+//*get input file from the DOM
+export function getInput(): string {
+    return (document.querySelector('.input-file') as HTMLTextAreaElement).value;
 }
 
 
-
 //*get eddited input file from the DOM
-document.querySelector('.run-button').addEventListener('click', function() {
-    let inputFromFile = document.querySelector('.input-file').innerHTML;
-    input = inputFromFile;
+document.querySelector('.run-button').addEventListener('click', function():string {
 
+    //*get the input from the DOM
+    let inputFromFile = document.querySelector('.input-file').innerHTML;
+
+    //*read and process the whole input file
+    lammpsRead(cleanInput(getInput()));
+
+    //*run the simulation
     commands.run(1000, "output.txt");
 
+    ///*return the input
+    return inputFromFile;
 });
 
 
+//*Parse the input file
 export function cleanInput (input: string){
     //*make each line into an array
     let inputAsArray = input.split((/\r?\n|\r|\n/g));
@@ -129,6 +131,7 @@ export function lammpsRead(instructions: string[]) {
 
             //*Setup simulation box
             case 'boundary':
+                commands.boundary(splittedInstruction[1], splittedInstruction[2], splittedInstruction[3]);
                 break;
 
             case 'change_box':

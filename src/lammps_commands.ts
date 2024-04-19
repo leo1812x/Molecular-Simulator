@@ -1,6 +1,6 @@
 import * as main from './main';
 import * as classes from './classes';
-import {Region, Lattice}  from './lammps_classes';
+import {Region}  from './lammps_classes';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import * as converter from './lammps_converter';
@@ -18,7 +18,6 @@ export let region_style;
 export let createbox_n;
 export let createbox_regionid;
 export let currentRegion: Region 
-export let currentLattice: Lattice
 export let pairStyle_func = '4*e*(((o/r)^12) - ((o/r)^6))'
 export let pairStyle_cutoff = 2.5;
 export let pair_style_style;
@@ -74,7 +73,21 @@ function units (style: string){
 
 
 //* Setup simulation box
-function boundary (){
+function boundary (x: string, y: string, z: string){
+    let styles = ['p', 'f', 's', 'm', 'f', 'p', 'm', 's', 'f', 'p', 'm', 's'];
+
+    //* check for invalid boundary style
+    if (!styles.includes(x) || !styles.includes(y) || !styles.includes(z)){
+        throw new Error('Invalid boundary style');
+    } 
+
+    currentRegion.boundary_x = Number.parseInt(x);
+    currentRegion.boundary_y = Number.parseInt(y);
+    currentRegion.boundary_z = Number.parseInt(z);
+
+    
+
+    
 
 }
 function change_box (){
@@ -92,9 +105,6 @@ function create_box (id: string, ...args: string[]){
     
             //*add the box helper to the scene
             main.scene.add( BoxHelper );
-
-            
-    
         }
 
 
@@ -108,7 +118,7 @@ export function dimension1 ( dim: number){
 }
 
 
-//  lattice         sq  0.1
+//  lattice         sq  1.0
 function lattice (style: string, scale: number, ...args: any[]){
     lattice_tyle = "none" || "sc" || "bcc" || "fcc" || "hcp" ||
                 "diamond" || "sq" || "sq2" || "hex" || "custom" ?
@@ -116,11 +126,6 @@ function lattice (style: string, scale: number, ...args: any[]){
 
     lattice_scale = scale;
 
-    //? this is not doing anything right now
-    currentLattice = new Lattice(style, scale, ...args);
-    
-
-    //? missing args or "values"    
 }
 
 function region (id: string, style: string, ...args: string[]){
@@ -533,25 +538,40 @@ function rerun (){
 //run             1000
 //*working on this yk
 function run (N:number, keyword: string, ...args: String[]){
+    //*start simulation controls
     const controls = new OrbitControls(main.camera, main.renderer.domElement);
-    converter.lammpsRead(converter.cleanInput(converter.input));
+
+    //*get the input from the DOM
+    converter.lammpsRead(converter.cleanInput(converter.getInput()));
+
+    console.log(converter.getInput());
+    
 
     let ts = 0.000005;
     //*animation loop
     function animate() {
+        //*keep THREE.JS running
         requestAnimationFrame( animate );
-    
+
         //* run the simulation for N timesteps
-        //? not done with this
         if (N > 0){
+
+            //*check each pair
             main.AllElements.forEach( element => {
+
+                
                 main.AllElements.forEach( element2 => {
                     if(element != element2){
+
+
                         element.stormerVerlet(ts,element2);
                     }
                         
                 });
             });
+            N--;
+            
+            
         }
 
 

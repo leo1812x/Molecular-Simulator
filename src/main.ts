@@ -14,9 +14,9 @@ export const scene = new THREE.Scene();
 export const camera = new THREE.PerspectiveCamera( 25, window.innerWidth / window.innerHeight, 1.0, 100 );
 export const renderer = new THREE.WebGLRenderer();
 
-
 //*helpers
 const gridHelper = new THREE.GridHelper(25, 10);
+scene.add( gridHelper ); //boxhelper was here too
 
 //*set the renderer on the DOM
 renderer.setSize( SIMULATOR.getBoundingClientRect().width, SIMULATOR.getBoundingClientRect().height);
@@ -29,10 +29,33 @@ camera.position.y = 10;
 camera.position.x = 4;
 
 //*single render to get THREE.JS to work
-scene.add( gridHelper ); //boxhelper was here too
 renderer.render( scene, camera );
 
-converter.lammpsRead(converter.cleanInput(converter.getInput()));
+//*purpose of this line is to run lammps_converter.ts and get the input on the DOM
+converter.getInput();
+
+//*AutoRun
+// Delay in milliseconds
+const delay = 1000; // 1 seconds
+
+
+//* AutoRun
+let run = false;
+if (run){
+    setTimeout(() => {
+        const elements = document.getElementsByClassName('run-button');
+        (elements[0] as HTMLElement).click();
+    }, delay);
+}
+
+
+
+
+
+
+
+
+
 
 
 

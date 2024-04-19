@@ -19,6 +19,7 @@ export class ThreeObject {
     Boltzmann   :number;    
 
     constructor(){
+        //*set the id
         ThreeObject.idCounter++;  
         this.id = ThreeObject.idCounter;
 
