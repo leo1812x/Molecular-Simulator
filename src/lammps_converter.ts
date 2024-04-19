@@ -1,8 +1,11 @@
 import * as commands from  './lammps_commands';
 
+console.log('converter loaded');
+
+
 //* This function will convert the input string from LAMMPS output and 
 //* convert it into a sequence of outputs that can be used by my program
-    export let input =`
+export let input =`
 # initialization
 units           lj
 dimension       2       #only support
@@ -24,19 +27,25 @@ velocity        all create  1.0 23494
 fix             1   all nve
 dump            1 all custom 10 output.txt id xs ys zs 
 run             1000
+
 `
 //*write input file to the DOM
 document.querySelector('.input-file').innerHTML = `${input}`;
 
 
 
-//*get eddited input file from the DOM
+export function getInput(): string{
+    return document.querySelector('.input-file').innerHTML;
+}
 
+
+
+//*get eddited input file from the DOM
 document.querySelector('.run-button').addEventListener('click', function() {
     let inputFromFile = document.querySelector('.input-file').innerHTML;
     input = inputFromFile;
 
-    lammpsRead(cleanInput(input));
+    commands.run(1000, "output.txt");
 
 });
 
@@ -283,7 +292,7 @@ export function lammpsRead(instructions: string[]) {
             //*Actions
 
             case 'run':
-                commands.run(Number.parseInt(splittedInstruction[1]), splittedInstruction[2]);
+                // commands.run(Number.parseInt(splittedInstruction[1]), splittedInstruction[2]);
                 break;
 
             //* Input control

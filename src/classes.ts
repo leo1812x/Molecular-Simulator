@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import * as setUp from './setup';
+import * as main from './main';
 
 export class ThreeObject {
     static idCounter:number = 0;
@@ -23,8 +23,8 @@ export class ThreeObject {
         this.id = ThreeObject.idCounter;
 
         //*add the element type to the list
-        if (!setUp.AllElementTypes.includes(this.constructor.name)){
-            setUp.AllElementTypes.push(this.constructor.name);
+        if (!main.AllElementTypes.includes(this.constructor.name)){
+            main.AllElementTypes.push(this.constructor.name);
         }
     }
 
@@ -93,9 +93,9 @@ export class THREE_LJ extends ThreeObject{
         super();
         
         //* set three.js atributes
-        setUp.AllElements.push(this);
+        main.AllElements.push(this);
         this.ball = new THREE.Mesh((new THREE.SphereGeometry(0.1, 32, 32)),new THREE.MeshBasicMaterial({color: 0xffff00}))
-        setUp.scene.add(this.ball);
+        main.scene.add(this.ball);
         this.velocity = new THREE.Vector3(0,0,0);
 
 

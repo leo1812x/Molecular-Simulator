@@ -1,7 +1,9 @@
-import * as setUp from './setup';
+import * as main from './main';
 import * as classes from './classes';
 import {Region, Lattice}  from './lammps_classes';
 import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/Addons.js';
+import * as converter from './lammps_converter';
 
 
 //* Initialization of variables
@@ -24,6 +26,7 @@ export let timesteps = 1.0;
 export let boxForHelper: THREE.BoxGeometry;
 
 
+console.log('commands loaded');
 
 
 
@@ -58,8 +61,8 @@ function units (style: string){
 
     //* set the unit variables style to lj variables 
     if (style == 'lj'){
-        for (let i = 0; i < setUp.AllElements.length; i++){
-            let element = setUp.AllElements[i];
+        for (let i = 0; i < main.AllElements.length; i++){
+            let element = main.AllElements[i];
             element.mass = 1.0;
             element.distance = 1.0;
             element.Boltzmann = 1.0;
@@ -88,7 +91,7 @@ function create_box (id: string, ...args: string[]){
             const BoxHelper = new THREE.BoxHelper( object, 0xffff00 );
     
             //*add the box helper to the scene
-            setUp.scene.add( BoxHelper );
+            main.scene.add( BoxHelper );
 
             
     
@@ -198,7 +201,7 @@ function create_atoms (type: string, style: string,){
                     positions.forEach(pos => {
                         const atom = new classes.THREE_LJ();
                         atom.ball.position.set(pos.x, pos.y, pos.z);
-                        setUp.scene.add(atom.ball);
+                        main.scene.add(atom.ball);
                     });
                 }
             }
@@ -225,10 +228,10 @@ function group (){
 //* Set the mass of the atoms by type
 function mass (I: string, value: number){
 
-    for (let i = 0; i < setUp.AllElements.length; i++){
-        let element = setUp.AllElements[i];
+    for (let i = 0; i < main.AllElements.length; i++){
+        let element = main.AllElements[i];
 
-        if (element.constructor.name == setUp.AllElementTypes[I] || I == '*'){
+        if (element.constructor.name == main.AllElementTypes[I] || I == '*'){
             element.mass = value;            
         }
     }
@@ -258,14 +261,14 @@ function velocity (group:string, style:string, ...args: string[]){
     if (group == 'all'){
         if (style == 'create'){
 
-            for (let i = 0; i < setUp.AllElements.length; i++){
-                let element = setUp.AllElements[i];
+            for (let i = 0; i < main.AllElements.length; i++){
+                let element = main.AllElements[i];
                 let temp = parseFloat(args[0]);
                 let randomSeed = parseFloat(args[1]);
 
                 
 
-                setUp.AllElements[i].velocity = new THREE.Vector3(Math.random() * 2 -1, 
+                main.AllElements[i].velocity = new THREE.Vector3(Math.random() * 2 -1, 
                                                                   Math.random() * 2 -1,
                                                                   Math.random() * 2 -1);
                 
@@ -327,23 +330,23 @@ function pair_coeff (I: string, J: string, ...args: string[]){
     //* i also need to grab the right potential function
     //* then i need to finally calculate the potential of each atom pair
 
-    for (let i = 0; i < setUp.AllElements.length; i++){
-        let atomA = setUp.AllElements[i];
+    for (let i = 0; i < main.AllElements.length; i++){
+        let atomA = main.AllElements[i];
 
         atomA.energy = Number.parseInt(args[0]);
         atomA.distance = Number.parseInt(args[1]);
 
-        for (let j = 0; j < setUp.AllElements.length; j++){
-            let atomB = setUp.AllElements[j];
+        for (let j = 0; j < main.AllElements.length; j++){
+            let atomB = main.AllElements[j];
 
             //* skip if atomA and atomB are the same
             if (atomA == atomB) continue;
 
             //* if atom is I or *
-            if (atomA.constructor.name == setUp.AllElementTypes[I] || I == '*'){
+            if (atomA.constructor.name == main.AllElementTypes[I] || I == '*'){
                 
                 //* if atom is J or *
-                if (atomB.constructor.name == setUp.AllElementTypes[J] || J == '*'){
+                if (atomB.constructor.name == main.AllElementTypes[J] || J == '*'){
                     
 
                 }
@@ -530,30 +533,31 @@ function rerun (){
 //run             1000
 //*working on this yk
 function run (N:number, keyword: string, ...args: String[]){
+    const controls = new OrbitControls(main.camera, main.renderer.domElement);
+    converter.lammpsRead(converter.cleanInput(converter.input));
 
     let ts = 0.000005;
-
-//*animation loop
-function animate() {
-	requestAnimationFrame( animate );
-   
-    //* run the simulation for N timesteps
-    if (N > 0){
-        setUp.AllElements.forEach( element => {
-            setUp.AllElements.forEach( element2 => {
-                if(element != element2){
-                    element.stormerVerlet(ts,element2);
-                }
-                    
+    //*animation loop
+    function animate() {
+        requestAnimationFrame( animate );
+    
+        //* run the simulation for N timesteps
+        //? not done with this
+        if (N > 0){
+            main.AllElements.forEach( element => {
+                main.AllElements.forEach( element2 => {
+                    if(element != element2){
+                        element.stormerVerlet(ts,element2);
+                    }
+                        
+                });
             });
-        });
-        
-    }
+        }
 
 
-    //!
-	setUp.renderer.render( setUp.scene, setUp.camera );
-} animate();
+        //!
+        main.renderer.render( main.scene, main.camera );
+    } animate();
 
 
 
