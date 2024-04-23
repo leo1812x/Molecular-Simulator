@@ -3,7 +3,7 @@ import * as classes from './classes';
 import {Region}  from './lammps_classes';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
-import * as converter from './lammps_converter';
+import * as converter from './lammps_parser';
 
 
 //* Initialization of variables
@@ -25,7 +25,6 @@ export let timesteps = 1.0;
 export let boxForHelper: THREE.BoxGeometry;
 
 
-console.log('commands loaded');
 
 
 
@@ -83,11 +82,7 @@ function boundary (x: string, y: string, z: string){
 
     currentRegion.boundary_x = Number.parseInt(x);
     currentRegion.boundary_y = Number.parseInt(y);
-    currentRegion.boundary_z = Number.parseInt(z);
-
-    
-
-    
+    currentRegion.boundary_z = Number.parseInt(z);    
 
 }
 function change_box (){
@@ -260,8 +255,7 @@ function set (){
 
 }
 
-
-//? this is not doing anything right now
+//?this function does not uses args[1], akka random seed
 function velocity (group:string, style:string, ...args: string[]){
     if (group == 'all'){
         if (style == 'create'){
@@ -273,9 +267,9 @@ function velocity (group:string, style:string, ...args: string[]){
 
                 
 
-                main.AllElements[i].velocity = new THREE.Vector3(Math.random() * 2 -1, 
-                                                                  Math.random() * 2 -1,
-                                                                  Math.random() * 2 -1);
+                main.AllElements[i].velocity = new THREE.Vector3(Math.random() * 2 -1 * temp, 
+                                                                  Math.random() * 2 -1 * temp,
+                                                                  Math.random() * 2 -1 * temp);
                 
 
             }
@@ -542,12 +536,11 @@ function run (N:number, keyword: string, ...args: String[]){
     const controls = new OrbitControls(main.camera, main.renderer.domElement);
 
     //*get the input from the DOM
-    converter.lammpsRead(converter.cleanInput(converter.getInput()));
+    converter.callCommands(converter.parseInput(converter.getInput()));
 
-    console.log(converter.getInput());
     
-
-    let ts = 0.000005;
+//    let ts = 0.000005;
+     let ts = 0.0000025;
     //*animation loop
     function animate() {
         //*keep THREE.JS running
@@ -558,20 +551,14 @@ function run (N:number, keyword: string, ...args: String[]){
 
             //*check each pair
             main.AllElements.forEach( element => {
-
                 
                 main.AllElements.forEach( element2 => {
                     if(element != element2){
-
-
-                        element.stormerVerlet(ts,element2);
+                        element.runMotion(ts,element2);
                     }
-                        
                 });
             });
             N--;
-            
-            
         }
 
 
@@ -579,6 +566,8 @@ function run (N:number, keyword: string, ...args: String[]){
         main.renderer.render( main.scene, main.camera );
     } animate();
 
+    console.log(currentRegion.x);
+    // main.scene.add(new THREE.Mesh(new THREE.BoxGeometry(5, 5, 5), new THREE.MeshBasicMaterial({color: 0x00ff00})));
 
 
 }

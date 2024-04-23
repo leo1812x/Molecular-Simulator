@@ -2,7 +2,7 @@
 import './index.css'
 import * as THREE from 'three';
 import { THREE_LJ, ThreeObject } from './classes';
-import * as converter from  './lammps_converter';
+import * as converter from  './lammps_parser';
 
 //!Set up
 export const SIMULATOR = document.getElementById('simulator');
@@ -40,8 +40,8 @@ const delay = 1000; // 1 seconds
 
 
 //* AutoRun
-let run = false;
-if (run){
+let AUTORUN = false;
+if (AUTORUN){
     setTimeout(() => {
         const elements = document.getElementsByClassName('run-button');
         (elements[0] as HTMLElement).click();

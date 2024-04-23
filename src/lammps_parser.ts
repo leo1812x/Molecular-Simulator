@@ -41,18 +41,19 @@ document.querySelector('.run-button').addEventListener('click', function():strin
     let inputFromFile = document.querySelector('.input-file').innerHTML;
 
     //*read and process the whole input file
-    lammpsRead(cleanInput(getInput()));
+    callCommands(parseInput(getInput()));
 
     //*run the simulation
     commands.run(1000, "output.txt");
 
+    
     ///*return the input
     return inputFromFile;
 });
 
 
 //*Parse the input file
-export function cleanInput (input: string){
+export function parseInput (input: string){
     //*make each line into an array
     let inputAsArray = input.split((/\r?\n|\r|\n/g));
     
@@ -103,7 +104,7 @@ export function cleanInput (input: string){
 }
 
 
-export function lammpsRead(instructions: string[]) {
+export function callCommands(instructions: string[]) {
     //*for each line, get the first instruction
     instructions.forEach(instruction => {
         let splittedInstruction = instruction.split(" ");

@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import * as main from './main';
+import { currentRegion } from './lammps_commands';
+
 
 export class ThreeObject {
     static idCounter:number = 0;
@@ -28,6 +30,25 @@ export class ThreeObject {
             main.AllElementTypes.push(this.constructor.name);
         }
     }
+
+    runMotion(dt:number, other:ThreeObject):void{
+        this.stormerVerlet(dt, other);
+    
+        const damping = 1.0;  // Reduce velocity by 20% upon collision
+        // Check boundaries for x, y, z and apply damping
+        if (Math.abs(this.ball.position.x) > currentRegion.x/2){
+            this.velocity.x *= -damping;            
+        }
+    
+        if (Math.abs(this.ball.position.y) > currentRegion.y/2){
+            this.velocity.y *= -damping;            
+        }
+    
+        if (Math.abs(this.ball.position.z) > currentRegion.z/2){
+            this.velocity.z *= -damping;            
+        }
+    }
+    
 
     stormerVerlet(dt: number, other: ThreeObject): void {
         //*old position and get parameters
@@ -81,6 +102,7 @@ export class ThreeObject {
         return acceleration;
     }
     
+
 }
 
 
